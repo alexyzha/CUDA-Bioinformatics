@@ -28,7 +28,7 @@ const std::string& fa_read::get_metadata() const {
 }
 
 char fa_read::operator[](size_t index) const {
-    if(index < 0 || index >= length) {
+    if(index >= length) {
         throw std::out_of_range("INDEX OUT OF RANGE IN FA_READ");
     }
     return seq[index];

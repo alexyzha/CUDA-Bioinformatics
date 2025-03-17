@@ -33,6 +33,21 @@ TEST(FA_READ, OPERATOR_OOB) {
 }
 
 /* TO DO */
-TEST(FA_READ, RANDOM_STRESS) {
+TEST(FA_READ, FILE_OUT) {
+    
+}
 
+TEST(FA_READ, RANDOM_STRESS) {
+    std::string seq = "";
+    int len = rand() % 100000;
+    for(int i = 0; i < len; ++i) {
+        seq.push_back(static_cast<char>(rand() % 0xff));
+    }
+    fa_read test_read("STRESS TEST", len, seq);
+    for(int i = 0; i < len; ++i) {
+        EXPECT_NO_THROW(test_read[i]) << "VALID INDEX ACCESS THROWS ERROR" << std::endl;
+        EXPECT_EQ(test_read[i], seq[i]) << "READ[" << i << "] DOESN'T MATCH TEMPLATE[" << i << "]" << std::endl;
+    }
+    EXPECT_THROW(test_read[-1], std::out_of_range) << "EXPECTED OOB EXCEPTION USING -1" << std::endl;
+    EXPECT_THROW(test_read[len], std::out_of_range) << "EXPECTED OOB EXCEPTION USING 17" << std::endl;
 }
