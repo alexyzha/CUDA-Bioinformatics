@@ -4,7 +4,7 @@ build:
 	docker build --platform linux/amd64 -t cuda-qcb .
 
 run:
-	docker run --rm --gpus all --platform linux/amd64 -it -v $(shell pwd):/src cuda-qcb
+	docker run --platform linux/amd64 -it --rm -v $(PWD):/src cuda-qcb
 
 prune:
 	docker container prune -f
