@@ -5,6 +5,8 @@ ENV DEBIAN_FRONTEND=noninteractive
 ## Install basic
 RUN apt-get update && apt-get install -y \
     build-essential \
+    valgrind \
+    gdb \
     cmake \
     wget \
     curl \
