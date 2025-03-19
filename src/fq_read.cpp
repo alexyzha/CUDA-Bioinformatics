@@ -2,7 +2,7 @@
 
 fq_read::fq_read(std::string id, size_t len, std::string seq_, std::string qual_, std::string meta) : fa_read(id, len, seq_, meta), qual(qual_) {}
 
-void fq_read::to_file(std::ostream& out) {
+void fq_read::to_file(std::ofstream& out) {
     out << "@" << read_id << " ";
     if(metadata != "") {
         out << metadata << " ";

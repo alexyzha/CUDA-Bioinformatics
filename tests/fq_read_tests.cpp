@@ -3,20 +3,20 @@
 
 TEST(FQ_READ, CONSTRUCTOR_1) {
     fq_read test_read("TESTY CAL", 35, "KLJKHJGHFTUYHJKUIYHUGHFGHJHKJHGHGCF", "QQQLKAJBHHUJIKSLAJNBHKJGUIHJNLASJKH");
-    EXPECT_EQ("TESTY CAL", test_read.get_id()) << "ID MISMATCH" << std::endl;
-    EXPECT_EQ(35, test_read.size()) << "READ SIZE MISMATCH" << std::endl;
-    EXPECT_EQ("KLJKHJGHFTUYHJKUIYHUGHFGHJHKJHGHGCF", test_read.get_seq()) << "READ SEQ MISMATCH" << std::endl;
-    EXPECT_EQ("QQQLKAJBHHUJIKSLAJNBHKJGUIHJNLASJKH", test_read.get_quality()) << "READ QUALITY MISMATCH" << std::endl;
-    EXPECT_EQ("", test_read.get_metadata()) << "METADATA MISMATCH" << std::endl;
+    EXPECT_EQ("TESTY CAL", test_read.get_id()) << RED << "ID MISMATCH" << RESET << std::endl;
+    EXPECT_EQ(35, test_read.size()) << RED << "READ SIZE MISMATCH" << RESET << std::endl;
+    EXPECT_EQ("KLJKHJGHFTUYHJKUIYHUGHFGHJHKJHGHGCF", test_read.get_seq()) << RED << "READ SEQ MISMATCH" << RESET << std::endl;
+    EXPECT_EQ("QQQLKAJBHHUJIKSLAJNBHKJGUIHJNLASJKH", test_read.get_quality()) << RED << "READ QUALITY MISMATCH" << RESET << std::endl;
+    EXPECT_EQ("", test_read.get_metadata()) << RED << "METADATA MISMATCH" << RESET << std::endl;
 }
 
 TEST(FQ_READ, CONSTRUCTOR_2) {
     fq_read test_read("T", 18, "LJKHJGUYFDTGCHGJHL", "ASJHQUAL QUAL LLLL", "META DATA...");
-    EXPECT_EQ("T", test_read.get_id()) << "ID MISMATCH" << std::endl;
-    EXPECT_EQ(18, test_read.size()) << "READ SIZE MISMATCH" << std::endl;
-    EXPECT_EQ("LJKHJGUYFDTGCHGJHL", test_read.get_seq()) << "READ SEQ MISMATCH" << std::endl;
-    EXPECT_EQ("ASJHQUAL QUAL LLLL", test_read.get_quality()) << "READ QUALITY MISMATCH" << std::endl;
-    EXPECT_EQ("META DATA...", test_read.get_metadata()) << "METADATA MISMATCH" << std::endl;
+    EXPECT_EQ("T", test_read.get_id()) << RED << "ID MISMATCH" << RESET << std::endl;
+    EXPECT_EQ(18, test_read.size()) << RED << "READ SIZE MISMATCH" << RESET << std::endl;
+    EXPECT_EQ("LJKHJGUYFDTGCHGJHL", test_read.get_seq()) << RED << "READ SEQ MISMATCH" << RESET << std::endl;
+    EXPECT_EQ("ASJHQUAL QUAL LLLL", test_read.get_quality()) << RED << "READ QUALITY MISMATCH" << RESET << std::endl;
+    EXPECT_EQ("META DATA...", test_read.get_metadata()) << RED << "METADATA MISMATCH" << RESET << std::endl;
 }
 
 TEST(FQ_READ, OPERATOR_IN_BOUND) {
@@ -24,23 +24,47 @@ TEST(FQ_READ, OPERATOR_IN_BOUND) {
     std::string qual = "MKHJGHFYTGHJKLKJKHJGHFGCVGJHKJLKMNBVBN";
     fq_read test_read("TEST", 38, seq, qual);
     for(int i = 0; i < 38; ++i) {
-        EXPECT_NO_THROW(test_read[i]) << "VALID INDEX ACCESS THROWS ERROR" << std::endl;
+        EXPECT_NO_THROW(test_read[i]) << RED << "VALID INDEX ACCESS THROWS ERROR" << RESET << std::endl;
         uint16_t exp_val = qual[i];
         exp_val <<= 8;
         exp_val |= seq[i];
-        EXPECT_EQ(test_read[i], exp_val) << "READ[" << i << "] DOESN'T MATCH TEMPLATE[" << i << "]" << std::endl;
+        EXPECT_EQ(test_read[i], exp_val) << RED << "READ[" << i << "] DOESN'T MATCH TEMPLATE[" << i << "]" << RESET << std::endl;
     }
 }
 
 TEST(FQ_READ, OPERATOR_OOB) {
     fq_read test_read("TEST", 20, "MUYTRFDSDERTGYHJKKJH", "KJHGFDEDSDFGHYUIOKJM");
-    EXPECT_THROW(test_read[-1], std::out_of_range) << "EXPECTED OOB EXCEPTION USING -1" << std::endl;
-    EXPECT_THROW(test_read[20], std::out_of_range) << "EXPECTED OOB EXCEPTION USING 20" << std::endl;
+    EXPECT_THROW(test_read[-1], std::out_of_range) << RED << "EXPECTED OOB EXCEPTION USING -1" << RESET << std::endl;
+    EXPECT_THROW(test_read[20], std::out_of_range) << RED << "EXPECTED OOB EXCEPTION USING 20" << RESET << std::endl;
 }
 
-/* TO DO */
+/*
+ *  to_file takes ostream as input, file_io burden put on programmer
+ */
 TEST(FQ_READ, FILE_OUT) {
-
+    std::vector<std::string> file_actual = {};
+    std::vector<std::string> file_exp {
+        "@SRR32254469.1 VH01851:45:AAG3H73M5:1:1101:21602:1000 length=26\n",
+        "GGTCCGTCCAGGCTGCCTGCAATGAT\n",
+        "+SRR32254469.1 VH01851:45:AAG3H73M5:1:1101:21602:1000 length=148\n",
+        "??????????????????????????\n"
+    };
+    std::string temp = "";
+    fq_read test_read("SRR32254469.1", 26, "GGTCCGTCCAGGCTGCCTGCAATGAT", "??????????????????????????", "VH01851:45:AAG3H73M5:1:1101:21602:1000");
+    std::ofstream outfile("outfiles/fq_read_out.txt");
+    EXPECT_TRUE(outfile.is_open()) << RED << "OUTFILE NOT CONFIGURED PROPERLY" << RESET << std::endl;
+    test_read.to_file(outfile);
+    outfile.close();
+    std::ifstream infile("outfiles/fq_read_out.txt");
+    EXPECT_TRUE(infile.is_open()) << RED << "UNABLE TO OPEN INFILE" << RESET << std::endl;
+    while(infile.getline(infile, temp)) {
+        file_actual.push_back(temp);
+    }
+    EXPECT_EQ(file_actual.size(), file_exp.size()) << RED << "DIFFERENT NUMBER OF OUTPUT LINES THAN EXPECTED" << RESET << std::endl;
+    for(int i = 0; i < file_exp.size(); ++i) {
+        EXPECT_EQ(file_actual[i], file_exp[i]) << RED << "FILE OUTPUT & EXPECTED OUTPUT MISMATCH AT LINE [" << i << "]" << RESET << std::endl;
+    }
+    infile.close();
 }
 
 TEST(FQ_READ, RANDOM_STRESS) {
@@ -53,12 +77,12 @@ TEST(FQ_READ, RANDOM_STRESS) {
     }
     fq_read test_read("STRESS TEST", len, seq, qual);
     for(int i = 0; i < len; ++i) {
-        EXPECT_NO_THROW(test_read[i]) << "VALID INDEX ACCESS THROWS ERROR" << std::endl;
+        EXPECT_NO_THROW(test_read[i]) << RED << "VALID INDEX ACCESS THROWS ERROR" << RESET << std::endl;
         uint16_t exp_val = qual[i];
         exp_val <<= 8;
         exp_val |= seq[i];
-        EXPECT_EQ(test_read[i], exp_val) << "READ[" << i << "] DOESN'T MATCH TEMPLATE[" << i << "]" << std::endl;
+        EXPECT_EQ(test_read[i], exp_val) << RED << "READ[" << i << "] DOESN'T MATCH TEMPLATE[" << i << "]" << RESET << std::endl;
     }
-    EXPECT_THROW(test_read[-1], std::out_of_range) << "EXPECTED OOB EXCEPTION USING -1" << std::endl;
-    EXPECT_THROW(test_read[len], std::out_of_range) << "EXPECTED OOB EXCEPTION USING 17" << std::endl;
+    EXPECT_THROW(test_read[-1], std::out_of_range) << RED << "EXPECTED OOB EXCEPTION USING -1" << RESET << std::endl;
+    EXPECT_THROW(test_read[len], std::out_of_range) << RED << "EXPECTED OOB EXCEPTION USING 17" << RESET << std::endl;
 }

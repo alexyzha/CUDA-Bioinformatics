@@ -2,7 +2,7 @@
 
 fa_read::fa_read(std::string id, size_t len, std::string seq_, std::string meta) : read_id(id), length(len), seq(seq_), metadata(meta) {};
 
-void fa_read::to_file(std::ostream& out) {
+void fa_read::to_file(std::ofstream& out) {
     out << ">" << read_id << " ";
     if(get_metadata() != "") {
         out << metadata << " ";
