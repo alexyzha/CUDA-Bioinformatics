@@ -1,5 +1,5 @@
+#include "util.h"
 #include "fa_read.h"
-#include <cstdint>
 
 class fq_read : public fa_read {
 public:

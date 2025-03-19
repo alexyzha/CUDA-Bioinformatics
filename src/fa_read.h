@@ -1,6 +1,4 @@
-#include <iostream>
-#include <string>
-#include <stdexcept>
+#include "util.h"
 
 class fa_read {
 public:
