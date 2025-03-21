@@ -14,7 +14,7 @@ std::vector<fa_read*> read_fasta(std::string file_path) {
                 break;
             }
             if(cur_line[0] == '>') {                                                // Start of a new read section
-                if(!cur_line.empty()) {
+                if(!cur_seq.empty()) {
                     reads.push_back(
                         new fa_read(cur_id,
                                     cur_seq.size(),
