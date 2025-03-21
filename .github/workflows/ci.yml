@@ -38,10 +38,11 @@ jobs:
         context: .
         file: ./Dockerfile
         push: false
-        tags: cuda-qcb
+        tags: cuda-qcb:latest
         platforms: linux/amd64
         cache-from: type=local,src=/tmp/.buildx-cache
         cache-to: type=local,dest=/tmp/.buildx-cache-new
+        outputs: type=docker
 
     - name: Move Cache
       if: success()
@@ -52,7 +53,7 @@ jobs:
     - name: Run All Tests
       run: |
         docker run --platform linux/amd64 -i --rm \
-        -v ${{ github.workspace }}:/src \
-        -w /src/tests/fastx \
-        cuda-qcb \
-        bash -c "make clean && make test"
+          -v ${{ github.workspace }}:/src \
+          -w /src/tests/fastx \
+          cuda-qcb:latest \
+          bash -c "make clean && make test"
