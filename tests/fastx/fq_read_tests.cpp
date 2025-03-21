@@ -1,5 +1,5 @@
 #include <gtest/gtest.h>
-#include "../src/fq_read.h"
+#include "../../src/fq_read.h"
 
 TEST(FQ_READ, CONSTRUCTOR_1) {
     // Create read (default metadata = "")
@@ -68,13 +68,13 @@ TEST(FQ_READ, FILE_OUT) {
     fq_read test_read("SRR32254469.1", 26, "GGTCCGTCCAGGCTGCCTGCAATGAT", "??????????????????????????", "VH01851:45:AAG3H73M5:1:1101:21602:1000");
     
     // fstream handle + streaming read to file
-    std::ofstream outfile("outfiles/fx_read/fq_read_out.txt");
+    std::ofstream outfile("outfiles/fq_read_out.txt");
     EXPECT_TRUE(outfile.is_open()) << RED << "OUTFILE NOT CONFIGURED PROPERLY" << RESET << std::endl;
     test_read.to_file(outfile);
     outfile.close();
 
     // fstream handle + checking read output to file
-    std::ifstream infile("outfiles/fx_read/fq_read_out.txt");
+    std::ifstream infile("outfiles/fq_read_out.txt");
     EXPECT_TRUE(infile.is_open()) << RED << "UNABLE TO OPEN INFILE" << RESET << std::endl;
     while(infile.getline(infile, temp)) {
         file_actual.push_back(temp);

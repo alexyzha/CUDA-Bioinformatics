@@ -1,5 +1,5 @@
 #include <gtest/gtest.h>
-#include "../src/cpu/fx_parser.h"
+#include "../../src/cpu/fx_parser.h"
 
 TEST(FA_PARSER_CPU, SINGLE) {
     // Expected fa_read variables
@@ -11,7 +11,7 @@ TEST(FA_PARSER_CPU, SINGLE) {
 
     // Validate file_io
     EXPECT_NO_THROW([&]() {
-        reads = read_fasta("infiles/fx_parser/fa_parser_single_in.txt");
+        reads = read_fasta("infiles/fa_parser_single_in.txt");
     }()) << RED << "INFILE CONFIG ERROR" << RESET << std::endl;
     EXPECT_EQ(reads.size(), 1) << RED << "EXPECTED 1 READ, GOT " << reads.size() << RESET << std::endl;
 
@@ -40,7 +40,7 @@ TEST(FA_PARSER_CPU, MULTIPLE) {
 
     // Validate file_io
     EXPECT_NO_THROW([&](){
-        reads = read_fasta("infiles/fx_parser/fa_parser_multi_in.txt");
+        reads = read_fasta("infiles/fa_parser_multi_in.txt");
     }()) << RED << "INFILE CONFIG ERROR" << RESET << std::endl;
     EXPECT_EQ(reads.size(), 3) << RED << "EXPECTED 3 READS, GOT " << reads.size() << RESET << std::endl;
 
@@ -68,7 +68,7 @@ TEST(FA_PARSER_CPU, ID_ONLY) {
 
     // Validate file_io
     EXPECT_NO_THROW([&]() {
-        reads = read_fasta("infiles/fx_parser/fa_parser_only_id_in.txt");
+        reads = read_fasta("infiles/fa_parser_only_id_in.txt");
     }()) << RED << "INFILE CONFIG ERROR" << RESET << std::endl;
     EXPECT_EQ(reads.size(), 1) << RED << "EXPECTED 1 READ, GOT " << reads.size() << RESET << std::endl;
 
@@ -85,7 +85,7 @@ TEST(FA_PARSER_CPU, EMPTY) {
     
     // Validate file_io
     EXPECT_NO_THROW([&](){
-        reads = read_fasta("infiles/fx_parser/empty.txt");
+        reads = read_fasta("infiles/empty.txt");
     }()) << RED << "INFILE CONFIG ERROR" << RESET << std::endl;
 
     // Validate output
@@ -103,7 +103,7 @@ TEST(FQ_PARSER_CPU, SINGLE) {
 
     // Validate file_io
     EXPECT_NO_THROW([&]() {
-        reads = read_fastq("infiles/fx_parser/fq_parser_single_in.txt");
+        reads = read_fastq("infiles/fq_parser_single_in.txt");
     }()) << RED << "INFILE CONFIG ERROR" << RESET << std::endl;
     EXPECT_EQ(reads.size(), 1) << RED << "EXPECTED 1 READ, GOT " << reads.size() << RESET << std::endl;
 
@@ -138,7 +138,7 @@ TEST(FQ_PARSER_CPU, MULTIPLE) {
 
     // Validate file_io
     EXPECT_NO_THROW([&](){
-        reads = read_fastq("infiles/fx_parser/fq_parser_multi_in.txt");
+        reads = read_fastq("infiles/fq_parser_multi_in.txt");
     }()) << RED << "INFILE CONFIG ERROR" << RESET << std::endl;
     EXPECT_EQ(reads.size(), 3) << RED << "EXPECTED 3 READS, GOT " << reads.size() << RESET << std::endl;
 
@@ -168,7 +168,7 @@ TEST(FQ_PARSER_CPU, ID_ONLY) {
 
     // Validate file_io
     EXPECT_NO_THROW([&]() {
-        reads = read_fastq("infiles/fx_parser/fq_parser_only_id_in.txt");
+        reads = read_fastq("infiles/fq_parser_only_id_in.txt");
     }()) << RED << "INFILE CONFIG ERROR" << RESET << std::endl;
     EXPECT_EQ(reads.size(), 1) << RED << "EXPECTED 1 READ, GOT " << reads.size() << RESET << std::endl;
 
@@ -186,7 +186,7 @@ TEST(FQ_PARSER_CPU, EMPTY) {
     
     // Validate file_io
     EXPECT_NO_THROW([&](){
-        reads = read_fastq("infiles/fx_parser/empty.txt");
+        reads = read_fastq("infiles/empty.txt");
     }()) << RED << "INFILE CONFIG ERROR" << RESET << std::endl;
 
     // Validate output
