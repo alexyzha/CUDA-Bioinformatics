@@ -50,10 +50,16 @@ jobs:
         rm -rf /tmp/.buildx-cache
         mv /tmp/.buildx-cache-new /tmp/.buildx-cache
 
-    - name: Run All Tests
+    - name: Run All Tests & Generate Report
       run: |
         docker run --platform linux/amd64 -i --rm \
           -v ${{ github.workspace }}:/src \
           -w /src/tests/fastx \
           cuda-qcb:latest \
-          bash -c "make clean && make test"
+          bash -c "make clean && make && ./obj/all_tests --gtest_output=xml:report.xml"
+
+    - name: Upload GTEST XML Report
+      uses: actions/upload-artifact@v3
+      with:
+        name: gtest-report
+        path: tests/fastx/report.xml
