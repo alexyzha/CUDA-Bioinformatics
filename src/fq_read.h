@@ -11,6 +11,7 @@ public:
     uint16_t operator[](size_t index) const;                    // Returns 16-bit bitmask | key: {LOW 0th}[read][qscore]{HIGH 15th}
 private:
     std::string qual;
+    
 };
 
 #endif

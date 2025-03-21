@@ -18,6 +18,7 @@ protected:
     std::string seq;
     std::string metadata;
     size_t length;
+    
 };
 
 #endif
