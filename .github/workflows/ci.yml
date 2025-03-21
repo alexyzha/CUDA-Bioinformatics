@@ -59,7 +59,7 @@ jobs:
           bash -c "make clean && make && ./obj/all_tests --gtest_output=xml:report.xml"
 
     - name: Upload GTEST XML Report
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: gtest-report
         path: tests/fastx/report.xml
