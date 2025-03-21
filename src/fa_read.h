@@ -1,5 +1,8 @@
 #include "util.h"
 
+#ifndef C_FA_READ
+#define C_FA_READ
+
 class fa_read {
 public:
     fa_read(std::string id, size_t len, std::string seq_, std::string meta = "");
@@ -16,3 +19,5 @@ protected:
     std::string metadata;
     size_t length;
 };
+
+#endif

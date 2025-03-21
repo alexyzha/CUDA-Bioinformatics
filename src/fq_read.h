@@ -1,5 +1,8 @@
 #include "fa_read.h"
 
+#ifndef C_FQ_READ
+#define C_FQ_READ
+
 class fq_read : public fa_read {
 public:
     fq_read(std::string id, size_t len, std::string seq_, std::string qual_, std::string meta = "");
@@ -9,3 +12,5 @@ public:
 private:
     std::string qual;
 };
+
+#endif

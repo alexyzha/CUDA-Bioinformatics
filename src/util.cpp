@@ -19,19 +19,19 @@ std::vector<std::string> split_by(const std::string& s, char c) {
     return substrings;
 }
 
-inline void ltrim(std::string &s) {
+void ltrim(std::string& s) {
     s.erase(s.begin(), std::find_if(s.begin(), s.end(), [](unsigned char c) {
         return !std::isspace(c);
     }));
 }
 
-inline void rtrim(std::string &s) {
+void rtrim(std::string& s) {
     s.erase(std::find_if(s.rbegin(), s.rend(), [](unsigned char c) {
         return !std::isspace(c);
     }).base(), s.end());
 }
 
-inline void trim(std::string &s) {
+void trim(std::string& s) {
     rtrim(s);
     ltrim(s);
 }

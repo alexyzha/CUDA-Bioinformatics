@@ -57,10 +57,10 @@ TEST(FQ_READ, FILE_OUT) {
     // File actual content vs expected content comparison
     std::vector<std::string> file_actual = {};
     std::vector<std::string> file_exp {
-        "@SRR32254469.1 VH01851:45:AAG3H73M5:1:1101:21602:1000 length=26\n",
-        "GGTCCGTCCAGGCTGCCTGCAATGAT\n",
-        "+SRR32254469.1 VH01851:45:AAG3H73M5:1:1101:21602:1000 length=148\n",
-        "??????????????????????????\n"
+        "@SRR32254469.1 VH01851:45:AAG3H73M5:1:1101:21602:1000 length=26",
+        "GGTCCGTCCAGGCTGCCTGCAATGAT",
+        "+SRR32254469.1 VH01851:45:AAG3H73M5:1:1101:21602:1000 length=26",
+        "??????????????????????????"
     };
     std::string temp = "";
 
@@ -76,7 +76,7 @@ TEST(FQ_READ, FILE_OUT) {
     // fstream handle + checking read output to file
     std::ifstream infile("outfiles/fq_read_out.txt");
     EXPECT_TRUE(infile.is_open()) << RED << "UNABLE TO OPEN INFILE" << RESET << std::endl;
-    while(infile.getline(infile, temp)) {
+    while(std::getline(infile, temp)) {
         file_actual.push_back(temp);
     }
     EXPECT_EQ(file_actual.size(), file_exp.size()) << RED << "DIFFERENT NUMBER OF OUTPUT LINES THAN EXPECTED" << RESET << std::endl;

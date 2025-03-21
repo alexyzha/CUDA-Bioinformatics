@@ -33,8 +33,8 @@
 
 std::vector<std::string> split_by(const std::string& s, char c);
 
-inline void ltrim(std::string &s);
+void ltrim(std::string& s);
 
-inline void rtrim(std::string &s);
+void rtrim(std::string& s);
 
-inline void trim(std::string &s);
+void trim(std::string& s);
