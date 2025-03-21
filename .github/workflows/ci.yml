@@ -58,8 +58,14 @@ jobs:
           cuda-qcb:latest \
           bash -c "make clean && make && ./obj/all_tests --gtest_output=xml:report.xml"
 
-    - name: Upload GTEST XML Report
+    - name: Upload FASTX GTEST XML Report
       uses: actions/upload-artifact@v4
       with:
         name: gtest-report
         path: tests/fastx/report.xml
+
+    - name: Publish FASTX GTEST XML Report
+      uses: EnricoMi/publish-unit-test-result-action@v2
+      with:
+        files: tests/fastx/report.xml
+        check_name: "FASTX Test Results (CPU)"
