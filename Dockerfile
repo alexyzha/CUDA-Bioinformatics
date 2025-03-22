@@ -4,6 +4,7 @@ ENV DEBIAN_FRONTEND=noninteractive
 
 ## Install basic
 RUN apt-get update && apt-get install -y \
+    sra-toolkit \
     build-essential \
     valgrind \
     gdb \
