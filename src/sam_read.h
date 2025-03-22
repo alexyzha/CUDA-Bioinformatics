@@ -3,18 +3,6 @@
 #ifndef C_SAM_READ
 #define C_SAM_READ
 
-class sam_container {
-public:
-    const std::unordered_map<std::string, std::string>& get_headers() const;
-    const std::vector<sam_read*>& get_reads() const;
-    void sort_reads();
-
-private:
-    std::vector<sam_read*> reads;
-    std::unordered_map<std::string, std::string> headers;
-
-};
-
 struct sam_read {
 public:
     std::vector<std::string> tags;

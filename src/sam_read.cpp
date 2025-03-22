@@ -1,7 +1,5 @@
 #include "sam_read.h"
 
-
-
 void sam_read_to_file(std::ofstream& out, sam_read& read) {
     auto [tags, qname, rname, cigar, rnext, seq, qual, flags, pos, posnext, tlen, mapq] = read;
     out << qname << "\t" 

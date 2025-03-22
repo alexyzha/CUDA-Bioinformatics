@@ -36,9 +36,9 @@ std::vector<sam_read*> read_sam(std::string file_path) {
     return reads;
 }
 
-std::unordered_map<std::string, std::vector<std::string>> read_sam_header(std::string file_path) {
+std::unordered_map<std::string, std::vector<std::string>> read_sam_headers(std::string file_path) {
     std::ifstream file(file_path);
-    std::unordered_map<std::string, std::vector<std::string>> header;
+    std::unordered_map<std::string, std::vector<std::string>> headers;
     if(file.is_open()) {
         std::string cur_line = "";
         while(std::getline(file, cur_line)) {
@@ -49,9 +49,10 @@ std::unordered_map<std::string, std::vector<std::string>> read_sam_header(std::s
             std::string marker = cur_line.substr(1, 2);
             cur_line = cur_line.substr(3);
             trim(cur_line);
-            header[marker].push_back(cur_line);
+            headers[marker].push_back(cur_line);
         }
     } else {
         std::cerr << "[" << file_path << "] DOES NOT EXIST OR ISN'T ABLE TO BE OPENED" << std::endl;
     }
+    return headers;
 }
