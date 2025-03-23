@@ -1,4 +1,4 @@
-#include "xam_parser.h"
+#include "headers/xam_parser.h"
 
 std::vector<sam_read*> read_sam(std::string file_path) {
     std::ifstream file(file_path);

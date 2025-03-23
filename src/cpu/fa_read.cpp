@@ -1,4 +1,4 @@
-#include "fa_read.h"
+#include "headers/fa_read.h"
 
 fa_read::fa_read(std::string id, size_t len, std::string seq_, std::string meta) : read_id(id), length(len), seq(seq_), metadata(meta) {};
 

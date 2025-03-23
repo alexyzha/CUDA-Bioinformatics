@@ -1,5 +1,5 @@
 #include <gtest/gtest.h>
-#include "../../src/cpu/fx_parser.h"
+#include "../../src/cpu/headers/fx_parser.h"
 
 TEST(FA_PARSER_CPU, SINGLE) {
     // Expected fa_read variables

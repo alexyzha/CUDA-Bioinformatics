@@ -1,4 +1,4 @@
-#include "sam_container.h"
+#include "headers/sam_container.h"
 
 const std::unordered_map<std::string, std::vector<std::string>>& sam_container::get_headers() const {
     return headers;

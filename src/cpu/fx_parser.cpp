@@ -1,4 +1,4 @@
-#include "fx_parser.h"
+#include "headers/fx_parser.h"
 
 std::vector<fa_read*> read_fasta(std::string file_path) {
     std::ifstream file(file_path);

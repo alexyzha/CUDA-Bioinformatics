@@ -1,4 +1,4 @@
-#include "fq_read.h"
+#include "headers/fq_read.h"
 
 fq_read::fq_read(std::string id, size_t len, std::string seq_, std::string qual_, std::string meta) : fa_read(id, len, seq_, meta), qual(qual_) {}
 

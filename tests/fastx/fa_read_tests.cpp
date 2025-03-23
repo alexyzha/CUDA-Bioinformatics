@@ -1,5 +1,5 @@
 #include <gtest/gtest.h>
-#include "../../src/cpu/fa_read.h"
+#include "../../src/cpu/headers/fa_read.h"
 
 TEST(FA_READ, CONSTRUCTOR_1) {
     // Create read (default metadata = "")

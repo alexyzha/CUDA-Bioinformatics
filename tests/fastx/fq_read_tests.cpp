@@ -1,5 +1,5 @@
 #include <gtest/gtest.h>
-#include "../../src/cpu/fq_read.h"
+#include "../../src/cpu/headers/fq_read.h"
 
 TEST(FQ_READ, CONSTRUCTOR_1) {
     // Create read (default metadata = "")
