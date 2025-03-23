@@ -32,6 +32,12 @@
 #define RESET "\x1B[0m"
 #endif
 
+#ifndef PHRED_COMMON
+#define PHRED_COMMON
+#define PHRED_BEGIN '!'
+#define PHRED_BEGIN_INT 33
+#endif
+
 std::vector<std::string> split_by(const std::string& s, char c);
 
 void ltrim(std::string& s);
@@ -39,3 +45,7 @@ void ltrim(std::string& s);
 void rtrim(std::string& s);
 
 void trim(std::string& s);
+
+int sum(const std::string& s, char offset = PHRED_BEGIN);
+
+char base_to_bit(char base);

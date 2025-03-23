@@ -35,3 +35,27 @@ void trim(std::string& s) {
     rtrim(s);
     ltrim(s);
 }
+
+int sum(const std::string& s, char offset) {
+    int ret = 0;
+    for(auto& c : s) {
+        ret += (c - offset);
+    }
+    return ret;
+}
+
+char base_to_bit(char base) {
+    switch(base) {
+        case 'A':
+            return 0b00;
+        case 'C':
+            return 0b01;
+        case 'G':
+            return 0b10;
+        case 'T':
+            return 0b11;
+        default:
+            std::cerr << "INPUT INCLUDES A NON-ACGT BASE" << std::endl;
+            return 0x80;
+    }
+}
