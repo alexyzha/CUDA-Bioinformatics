@@ -1,5 +1,5 @@
 ## Ubuntu base image
-FROM ubuntu:22.04
+FROM nvidia/cuda:12.1.1-devel-ubuntu22.04
 ENV DEBIAN_FRONTEND=noninteractive
 
 ## Install basic
