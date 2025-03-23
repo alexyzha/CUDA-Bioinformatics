@@ -1,5 +1,5 @@
 #include "sam_read.h"
-#include "cpu/xam_parser.h"
+#include "xam_parser.h"
 
 class sam_container {
 public:

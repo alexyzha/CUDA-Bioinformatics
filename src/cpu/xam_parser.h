@@ -1,5 +1,5 @@
-#include "../sam_read.h"
-#include "../util.h"
+#include "sam_read.h"
+#include "util.h"
 
 std::vector<sam_read*> read_sam(std::string file_path);
 
