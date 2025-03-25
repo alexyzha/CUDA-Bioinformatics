@@ -8,4 +8,6 @@ void sam_to_file(sam_container& sam, std::string file_path);
 
 std::string make_cigar(alignment& align);
 
-std::vector<sam_read*> map_reads_to_ref(std::string ref, std::string ref_id, std::vector<fq_read*>& reads, size_t k);
+std::vector<sam_read*> map_reads_to_ref(std::string& ref, std::string ref_id, std::vector<fq_read*>& reads, size_t k);
+
+void sam_to_vcf(std::string file_path, std::string& ref, std::string ref_id, std::vector<sam_read*>& reads, int CHROMO);

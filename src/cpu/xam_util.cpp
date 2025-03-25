@@ -68,7 +68,7 @@ std::string make_cigar(alignment& align) {
     return cigar;
 }
 
-std::vector<sam_read*> map_reads_to_ref(std::string ref, std::string ref_id, std::vector<fq_read*>& reads, size_t k) {
+std::vector<sam_read*> map_reads_to_ref(std::string& ref, std::string ref_id, std::vector<fq_read*>& reads, size_t k) {
     if(k > 32 || k <= 0) {
         throw std::invalid_argument("K CANNOT BE GREATER THAN 32 OR LESS THAN 1");
     }
@@ -139,4 +139,50 @@ std::vector<sam_read*> map_reads_to_ref(std::string ref, std::string ref_id, std
         mapped_reads.push_back(sread);
     }
     return mapped_reads;
+}
+
+void sam_to_vcf(std::string file_path, std::string& ref, std::string ref_id, std::vector<sam_read*>& reads, int CHROMO) {
+    std::ofstream file(file_path);
+    if(!file.is_open()) {
+        throw std::invalid_argument("FILE DOESN'T EXIST OR UNABLE TO OPEN FILE");
+    }
+
+    // Headers
+    file << "##fileformat=VCFv4.2\n";
+    file << "##source=cubio";
+    file << "##reference=" << ref_id << "\n";
+    file << "##CHROM\tPOS\tID\tREF\tALT\tQUAL\tFILTER\tINFO\n";
+
+    std::unordered_set<std::string> vis;
+    for(auto& read : reads) {
+        if(read->flags & 0x4) {
+            continue;
+        }
+        const std::string& seq = read->seq;
+        size_t pos = read->pos;
+        for(size_t i = 0; i < seq.size(); ++i) {
+            size_t ref_pos = pos + i - 1;
+            if(ref_pos >= ref.size()) {
+                break;
+            }
+            char base_ref = ref[ref_pos];
+            char base_alt = seq[i];
+            if(base_ref != base_alt && base_ref != 'N' && base_alt != 'N') {
+                std::string key = std::to_string(CHROMO) + ":" + std::to_string(ref_pos + 1);
+                if(vis.count(key)) {
+                    continue;
+                }
+                file << CHROMO << "\t"
+                     << ref_pos + 1 << "\t"
+                     << "." << "\t"
+                     << base_ref << "\t"
+                     << base_alt << "\t"
+                     << "255" << "\t"               // Placeholder quality
+                     << "PASS" << "\t"
+                     << "DP=1\n";
+                vis.insert(key);
+            }
+        }
+    }
+    file.close();
 }
