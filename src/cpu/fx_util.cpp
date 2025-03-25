@@ -212,3 +212,30 @@ alignment local_align(const std::string& ref, const std::string& read) {
     std::reverse(aligned_read.begin(), aligned_read.end());
     return {max_score, max_i - 1, max_j - 1, aligned_ref, aligned_read};
 }
+
+std::vector<std::unordered_set<int>*> cluster_by_kmer(std::unordered_map<uint64_t, std::unordered_set<int>>& kmer_map, int READS, int THRESH) {
+    std::unordered_map<int, std::unordered_map<int, int>> overlaps;
+    for(auto& [kmer, reads] : kmer_map) {
+        for(auto i = reads.begin(); i != reads.end(); ++i) {
+            for(auto j = std::next(i); j != reads.end(); ++j) {
+                ++overlaps[*i][*j];
+                ++overlaps[*j][*i];
+            }
+        }
+    }
+    union_find* uf;
+    for(auto& [i, row] : overlaps) {
+        for(auto& [j, shared] : row) {
+            if(shared >= THRESH) {
+                uf->join(i, j);
+            }
+        }
+    }
+    // Convert to islands
+    std::vector<std::unordered_set<int>*> islands(READS);
+    for(int i = 0; i < READS; ++i) {
+        int root = uf->find(i);
+        islands[root]->insert(i);
+    }
+    return islands;
+}

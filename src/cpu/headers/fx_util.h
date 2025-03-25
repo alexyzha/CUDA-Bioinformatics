@@ -50,3 +50,10 @@ std::unordered_map<uint64_t, std::unordered_set<int>> index_kmer(const std::vect
  *  - Ref = fasta, read = fastq
  */
 alignment local_align(const std::string& ref, const std::string& read);
+
+/*
+ *  - THRESH = number of overlaps needed to be placed in an island. DEFAULT = 1
+ *  - READS = number of unique reads in kmer_map 
+ *  - Return format: vector of size READS. index i holds ptr to set of all reads rooted at i 
+ */
+std::vector<std::unordered_set<int>*> cluster_by_kmer(std::unordered_map<uint64_t, std::unordered_set<int>>& kmer_map, int READS, int THRESH = 1);
