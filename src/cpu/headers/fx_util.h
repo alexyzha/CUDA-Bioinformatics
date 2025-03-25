@@ -17,6 +17,11 @@
 #endif
 
 /*
+ *  - Convenience function for vector of fa/fq reads
+ */
+void fa_to_file(std::vector<fa_read*>& reads, std::string file_path);
+
+/*
  *  - PERC = cutoff proportion when < 1.0
  *  - PERC = sliding window window size when >= 1.0
  */
@@ -57,3 +62,4 @@ alignment local_align(const std::string& ref, const std::string& read);
  *  - Return format: vector of size READS. index i holds ptr to set of all reads rooted at i 
  */
 std::vector<std::unordered_set<int>*> cluster_by_kmer(std::unordered_map<uint64_t, std::unordered_set<int>>& kmer_map, int READS, int THRESH = 1);
+

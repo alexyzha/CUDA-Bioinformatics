@@ -1,5 +1,8 @@
 #include "util.h"
 
+#ifndef C_ALIGNMENT
+#define C_ALIGNMENT
+
 struct alignment {
 public:
     int score;
@@ -9,6 +12,11 @@ public:
     std::string aligned_read;
 
 };
+
+#endif
+
+#ifndef C_UF
+#define C_UF
 
 /*
  *  My poor baby...
@@ -25,3 +33,5 @@ private:
     std::unordered_map<int, int> h;
     
 };
+
+#endif

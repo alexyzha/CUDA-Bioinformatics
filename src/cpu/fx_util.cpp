@@ -1,5 +1,12 @@
 #include "headers/fx_util.h"
 
+void fa_to_file(std::vector<fa_read*>& reads, std::string file_path) {
+    std::ofstream file(file_path);
+    for(auto& read : reads) {
+        read->to_file(file);
+    }
+}
+
 std::vector<fq_read*> filter_fa(const std::vector<fq_read*>& reads, char FILTER_BY, char THRESH, double PERC) {
     std::vector<fq_read*> filtered_reads;
     for(auto& read : reads) {
@@ -211,6 +218,14 @@ alignment local_align(const std::string& ref, const std::string& read) {
     std::reverse(aligned_ref.begin(), aligned_ref.end());
     std::reverse(aligned_read.begin(), aligned_read.end());
     return {max_score, max_i - 1, max_j - 1, aligned_ref, aligned_read};
+}
+
+std::string make_cigar(alignment& align) {
+
+    /*
+    DO LATER
+    */
+
 }
 
 std::vector<std::unordered_set<int>*> cluster_by_kmer(std::unordered_map<uint64_t, std::unordered_set<int>>& kmer_map, int READS, int THRESH) {
