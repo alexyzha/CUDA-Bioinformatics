@@ -38,16 +38,37 @@ void sam_to_file(sam_container& sam, std::string file_path) {
 }
 
 std::string make_cigar(alignment& align) {
-
-    /*
-    
-        DO LATER
-    
-    */
-
+    std::string cigar;
+    char prev = '\0';
+    int count = 0;
+    for(size_t i = 0; i < align.aligned_ref.size(); ++i) {
+        char rf = align.aligned_ref[i];
+        char rd = align.aligned_read[i];
+        char cur;
+        if(rf == '-') {
+            cur = 'I';
+        } else if(rd == '-') {
+            cur = 'D';
+        } else {
+            cur = 'M';
+        }
+        if(cur == prev) {
+            ++count;
+        } else {
+            if(count > 0) {
+                cigar += std::to_string(count) + prev;
+            }
+            prev = cur;
+            count = 1;
+        }
+    }
+    if(count > 0) {
+        cigar += std::to_string(count) + prev;
+    }
+    return cigar;
 }
 
-std::vector<sam_read*> map_reads_to_ref(std::string ref, std::vector<fq_read*>& reads, size_t k) {
+std::vector<sam_read*> map_reads_to_ref(std::string ref, std::string ref_id, std::vector<fq_read*>& reads, size_t k) {
     if(k > 32 || k <= 0) {
         throw std::invalid_argument("K CANNOT BE GREATER THAN 32 OR LESS THAN 1");
     }
@@ -103,16 +124,16 @@ std::vector<sam_read*> map_reads_to_ref(std::string ref, std::vector<fq_read*>& 
         sam_read* sread = new sam_read{
             {},                         // No tags
             read->get_id(),
-            ref,
+            ref_id,
             (best_score <= 0) ? "*" : make_cigar(best_align),
             "*",
             seq,
             read->get_quality(),
-            (best_score <= 0) ? 0x4 : 0,
+            static_cast<uint16_t>((best_score <= 0) ? 0x4 : 0),
             (best_score <= 0) ? 0 : best_pos_global,
             0,
             0,
-            255
+            static_cast<char>(255)
         };
 
         mapped_reads.push_back(sread);
