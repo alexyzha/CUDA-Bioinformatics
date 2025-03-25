@@ -1,13 +1,13 @@
 #include "headers/fx_util.h"
 
-void fa_to_file(std::vector<fa_read*>& reads, std::string file_path) {
+void fa_to_file(const std::vector<fq_read*>& reads, std::string file_path) {
     std::ofstream file(file_path);
     for(auto& read : reads) {
         read->to_file(file);
     }
 }
 
-std::vector<fq_read*> filter_fa(const std::vector<fq_read*>& reads, char FILTER_BY, char THRESH, double PERC) {
+std::vector<fq_read*> filter_fq(const std::vector<fq_read*>& reads, char FILTER_BY, char THRESH, double PERC) {
     std::vector<fq_read*> filtered_reads;
     for(auto& read : reads) {
         switch(FILTER_BY) {
@@ -96,9 +96,10 @@ std::vector<fq_read*> filter_fa(const std::vector<fq_read*>& reads, char FILTER_
             }
         }
     }
+    return reads;
 }
 
-std::vector<double> gc_per_read(const std::vector<fa_read*>& reads) {
+std::vector<double> gc_per_read(const std::vector<fq_read*>& reads) {
     std::vector<double> percs;
     for(auto& read : reads) {
         int count = 0;
@@ -113,7 +114,7 @@ std::vector<double> gc_per_read(const std::vector<fa_read*>& reads) {
     return percs;
 }
 
-double gc_global(const std::vector<fa_read*>& reads) {
+double gc_global(const std::vector<fq_read*>& reads) {
     uint64_t count = 0;                             // 3bil human bases > INT_MAX
     uint64_t total_bases = 0;
     for(auto& read : reads) {
@@ -128,7 +129,7 @@ double gc_global(const std::vector<fa_read*>& reads) {
     return static_cast<double>(count / total_bases);
 }
 
-std::unordered_map<uint64_t, uint64_t> count_kmer(const std::vector<fa_read*>& reads, size_t k) {
+std::unordered_map<uint64_t, uint64_t> count_kmer(const std::vector<fq_read*>& reads, size_t k) {
     if(k > 32 || k <= 0) {
         throw std::invalid_argument("K CANNOT BE GREATER THAN 32 OR LESS THAN 1");
     }
@@ -150,7 +151,7 @@ std::unordered_map<uint64_t, uint64_t> count_kmer(const std::vector<fa_read*>& r
     return kmers;
 }
 
-std::unordered_map<uint64_t, std::unordered_set<int>> index_kmer(const std::vector<fa_read*>& reads, size_t k) {
+std::unordered_map<uint64_t, std::unordered_set<int>> index_kmer(const std::vector<fq_read*>& reads, size_t k) {
     if(k > 32 || k <= 0) {
         throw std::invalid_argument("K CANNOT BE GREATER THAN 32 OR LESS THAN 1");
     }
@@ -218,14 +219,6 @@ alignment local_align(const std::string& ref, const std::string& read) {
     std::reverse(aligned_ref.begin(), aligned_ref.end());
     std::reverse(aligned_read.begin(), aligned_read.end());
     return {max_score, max_i - 1, max_j - 1, aligned_ref, aligned_read};
-}
-
-std::string make_cigar(alignment& align) {
-
-    /*
-    DO LATER
-    */
-
 }
 
 std::vector<std::unordered_set<int>*> cluster_by_kmer(std::unordered_map<uint64_t, std::unordered_set<int>>& kmer_map, int READS, int THRESH) {
