@@ -32,6 +32,7 @@ std::vector<sam_read*> read_sam(std::string file_path) {
             read_line[4][0]
         });
     }
+    file.close();
     return reads;
 }
 
@@ -52,5 +53,6 @@ std::unordered_map<std::string, std::vector<std::string>> read_sam_headers(std::
         trim(cur_line);
         headers[marker].push_back(cur_line);
     }
+    file.close();
     return headers;
 }

@@ -1,5 +1,10 @@
 #include "headers/sam_container.h"
 
+sam_container::sam_container(std::string file_path) {
+    headers = read_sam_headers(file_path);
+    reads = read_sam(file_path);
+}
+
 const std::unordered_map<std::string, std::vector<std::string>>& sam_container::get_headers() const {
     return headers;
 }

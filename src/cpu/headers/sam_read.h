@@ -20,8 +20,6 @@ public:
 
 };
 
-void sam_read_to_file(std::ofstream& out, sam_read& read);
-
 #endif
 
 /*
