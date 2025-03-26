@@ -96,7 +96,7 @@ std::vector<fq_read*> filter_fq(const std::vector<fq_read*>& reads, char FILTER_
             }
         }
     }
-    return reads;
+    return filtered_reads;
 }
 
 std::vector<double> gc_per_read(const std::vector<fq_read*>& reads) {
