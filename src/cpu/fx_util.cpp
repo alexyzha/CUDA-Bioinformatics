@@ -12,8 +12,8 @@ std::vector<fq_read*> filter_fq(const std::vector<fq_read*>& reads, char FILTER_
     for(auto& read : reads) {
         switch(FILTER_BY) {
             case AVERAGE_DISCARD_WHOLE: {
-                double average = static_cast<double>(sum(read->get_quality(), PHRED_BEGIN)) / read->size();
-                if(average >= static_cast<double>(FILTER_BY - PHRED_BEGIN)) {
+                double average = static_cast<double>(sum(read->get_quality(), 0)) / read->size();
+                if(average >= static_cast<double>(THRESH)) {
                     filtered_reads.push_back(
                         new fq_read(read->get_id(),
                                     read->size(),
@@ -50,16 +50,16 @@ std::vector<fq_read*> filter_fq(const std::vector<fq_read*>& reads, char FILTER_
                 int trim_index = read->size();
                 for(size_t i = 0; i < WINDOW_SIZE; ++i) {
                     char quality = static_cast<char>(((*read)[i] >> 8));
-                    sum += quality - PHRED_BEGIN;
+                    sum += quality;
                 }
-                if(static_cast<double>(sum / read->size()) < (FILTER_BY - PHRED_BEGIN)) {
+                if(sum < (THRESH * WINDOW_SIZE)) {
                     trim_index = 0;
                 } else {
                     for(size_t i = WINDOW_SIZE; i < read->size(); ++i) {
                         sum -= static_cast<char>(((*read)[i - WINDOW_SIZE] >> 8));
                         sum += static_cast<char>(((*read)[i] >> 8));
-                        if(static_cast<double>(sum / read->size()) < (FILTER_BY - PHRED_BEGIN)) {
-                            trim_index = i - WINDOW_SIZE + 1;
+                        if(sum < (THRESH * WINDOW_SIZE)) {
+                            trim_index = i;
                             break;
                         }
                     }
@@ -79,11 +79,11 @@ std::vector<fq_read*> filter_fq(const std::vector<fq_read*>& reads, char FILTER_
                 size_t ct = 0;
                 for(size_t i = 0; i < read->size(); ++i) {
                     char quality = static_cast<char>(((*read)[i] >> 8));
-                    if(quality < THRESH) {
+                    if(quality >= THRESH) {
                         ++ct;
                     }
                 }
-                if(static_cast<double>(ct / read->size()) >= PERC) {
+                if(static_cast<double>(ct) / read->size() >= PERC) {
                     filtered_reads.push_back(
                         new fq_read(read->get_id(),
                                     read->size(),
@@ -126,7 +126,7 @@ double gc_global(const std::vector<fq_read*>& reads) {
             }
         }
     }
-    return static_cast<double>(count / total_bases);
+    return static_cast<double>(count) / total_bases;
 }
 
 std::unordered_map<uint64_t, uint64_t> count_kmer(const std::vector<fq_read*>& reads, size_t k) {
@@ -165,7 +165,7 @@ std::unordered_map<uint64_t, std::unordered_set<int>> index_kmer(const std::vect
         for(size_t j = 0; j < reads[i]->size(); ++j) {
             hash <<= 2;
             hash |= (static_cast<char>(0b11) & base_to_bit(static_cast<char>((*reads[i])[j])));
-            if(i >= k - 1) {
+            if(j >= k - 1) {
                 kmer_map[hash & mask].insert(i);
             }
         }
@@ -218,7 +218,7 @@ alignment local_align(const std::string& ref, const std::string& read) {
     }
     std::reverse(aligned_ref.begin(), aligned_ref.end());
     std::reverse(aligned_read.begin(), aligned_read.end());
-    return {max_score, max_i - 1, max_j - 1, aligned_ref, aligned_read};
+    return {max_score, max_i - 1, max_j - 1, &aligned_ref, &aligned_read};
 }
 
 std::vector<std::unordered_set<int>*> cluster_by_kmer(std::unordered_map<uint64_t, std::unordered_set<int>>& kmer_map, int READS, int THRESH) {

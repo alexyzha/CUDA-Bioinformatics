@@ -8,11 +8,11 @@ TEST(FX_UTIL, FILTER_FQ_AVERAGE_DISCARD_ALL) {
     reads.push_back(new fq_read("ID2", 5, "GATCA", "???!!", ""));
     ret = filter_fq(reads, AVERAGE_DISCARD_WHOLE, '?');
     EXPECT_EQ(ret.size(), 1) << RED << "EXP ONLY 1 READ" << RESET << std::endl;
-    EXPECT_EQ(reads[0]->get_id(), "ID1") << RED << "WRONG ID" << RESET << std::endl;
-    EXPECT_EQ(reads[0]->size(), 5) << RED << "WRONG SIZE" << RESET << std::endl;
-    EXPECT_EQ(reads[0]->get_seq(), "ACGTA") << RED << "WRONG SEQ" << RESET << std::endl;
-    EXPECT_EQ(reads[0]->get_quality(), "?????") << RED << "WRONG QUALITY" << RESET << std::endl;
-    EXPECT_EQ(reads[0]->get_metadata(), "") << RED << "METADATA" << RESET << std::endl;
+    EXPECT_EQ(ret[0]->get_id(), "ID1") << RED << "WRONG ID" << RESET << std::endl;
+    EXPECT_EQ(ret[0]->size(), 5) << RED << "WRONG SIZE" << RESET << std::endl;
+    EXPECT_EQ(ret[0]->get_seq(), "ACGTA") << RED << "WRONG SEQ" << RESET << std::endl;
+    EXPECT_EQ(ret[0]->get_quality(), "?????") << RED << "WRONG QUALITY" << RESET << std::endl;
+    EXPECT_EQ(ret[0]->get_metadata(), "") << RED << "METADATA" << RESET << std::endl;
 }
 
 TEST(FX_UTIL, FILTER_FQ_SINGLE_DISCARD_ALL) {
@@ -25,11 +25,11 @@ TEST(FX_UTIL, FILTER_FQ_SINGLE_DISCARD_ALL) {
     reads.push_back(new fq_read("ID5", 5, "GCTAG", "!???!", ""));
     ret = filter_fq(reads, SINGLE_DISCARD_WHOLE, '?');
     EXPECT_EQ(ret.size(), 1) << RED << "EXP ONLY 1 READ" << RESET << std::endl;
-    EXPECT_EQ(reads[0]->get_id(), "ID1") << RED << "WRONG ID" << RESET << std::endl;
-    EXPECT_EQ(reads[0]->size(), 5) << RED << "WRONG SIZE" << RESET << std::endl;
-    EXPECT_EQ(reads[0]->get_seq(), "ACGTA") << RED << "WRONG SEQ" << RESET << std::endl;
-    EXPECT_EQ(reads[0]->get_quality(), "?????") << RED << "WRONG QUALITY" << RESET << std::endl;
-    EXPECT_EQ(reads[0]->get_metadata(), "") << RED << "METADATA" << RESET << std::endl;
+    EXPECT_EQ(ret[0]->get_id(), "ID1") << RED << "WRONG ID" << RESET << std::endl;
+    EXPECT_EQ(ret[0]->size(), 5) << RED << "WRONG SIZE" << RESET << std::endl;
+    EXPECT_EQ(ret[0]->get_seq(), "ACGTA") << RED << "WRONG SEQ" << RESET << std::endl;
+    EXPECT_EQ(ret[0]->get_quality(), "?????") << RED << "WRONG QUALITY" << RESET << std::endl;
+    EXPECT_EQ(ret[0]->get_metadata(), "") << RED << "METADATA" << RESET << std::endl;
 }
 
 TEST(FX_UTIL, FILTER_FQ_SLIDING_WINDOW) {
@@ -38,11 +38,11 @@ TEST(FX_UTIL, FILTER_FQ_SLIDING_WINDOW) {
     reads.push_back(new fq_read("ID1", 5, "GTAGC", "??!!?", ""));
     ret = filter_fq(reads, SLIDING_WINDOW, '?', 2.0);
     EXPECT_EQ(ret.size(), 1) << RED << "EXP ONLY 1 READ" << RESET << std::endl;
-    EXPECT_EQ(reads[0]->get_id(), "ID1") << RED << "WRONG ID" << RESET << std::endl;
-    EXPECT_EQ(reads[0]->size(), 2) << RED << "WRONG SIZE" << RESET << std::endl;
-    EXPECT_EQ(reads[0]->get_seq(), "GT") << RED << "WRONG SEQ" << RESET << std::endl;
-    EXPECT_EQ(reads[0]->get_quality(), "??") << RED << "WRONG QUALITY" << RESET << std::endl;
-    EXPECT_EQ(reads[0]->get_metadata(), "") << RED << "METADATA" << RESET << std::endl;
+    EXPECT_EQ(ret[0]->get_id(), "ID1") << RED << "WRONG ID" << RESET << std::endl;
+    EXPECT_EQ(ret[0]->size(), 2) << RED << "WRONG SIZE" << RESET << std::endl;
+    EXPECT_EQ(ret[0]->get_seq(), "GT") << RED << "WRONG SEQ" << RESET << std::endl;
+    EXPECT_EQ(ret[0]->get_quality(), "??") << RED << "WRONG QUALITY" << RESET << std::endl;
+    EXPECT_EQ(ret[0]->get_metadata(), "") << RED << "METADATA" << RESET << std::endl;
 }
 
 TEST(FX_UTIL, FILTER_FQ_PROPORTION_DISCARD_WHOLE) {
@@ -52,11 +52,11 @@ TEST(FX_UTIL, FILTER_FQ_PROPORTION_DISCARD_WHOLE) {
     reads.push_back(new fq_read("ID2", 5, "GTAGC", "??!??", ""));
     ret = filter_fq(reads, PROPORTION_DISCARD_WHOLE, '?', 0.5);
     EXPECT_EQ(ret.size(), 1) << RED << "EXP ONLY 1 READ" << RESET << std::endl;
-    EXPECT_EQ(reads[0]->get_id(), "ID2") << RED << "WRONG ID" << RESET << std::endl;
-    EXPECT_EQ(reads[0]->size(), 5) << RED << "WRONG SIZE" << RESET << std::endl;
-    EXPECT_EQ(reads[0]->get_seq(), "GTAGC") << RED << "WRONG SEQ" << RESET << std::endl;
-    EXPECT_EQ(reads[0]->get_quality(), "??!??") << RED << "WRONG QUALITY" << RESET << std::endl;
-    EXPECT_EQ(reads[0]->get_metadata(), "") << RED << "METADATA" << RESET << std::endl;
+    EXPECT_EQ(ret[0]->get_id(), "ID2") << RED << "WRONG ID" << RESET << std::endl;
+    EXPECT_EQ(ret[0]->size(), 5) << RED << "WRONG SIZE" << RESET << std::endl;
+    EXPECT_EQ(ret[0]->get_seq(), "GTAGC") << RED << "WRONG SEQ" << RESET << std::endl;
+    EXPECT_EQ(ret[0]->get_quality(), "??!??") << RED << "WRONG QUALITY" << RESET << std::endl;
+    EXPECT_EQ(ret[0]->get_metadata(), "") << RED << "METADATA" << RESET << std::endl;
 }
 
 TEST(FX_UTIL, GC_PER_READ) {
@@ -151,8 +151,8 @@ TEST(FX_UTIL, COUNT_KMER_NORMAL_1) {
     res = count_kmer(reads, 3);
     EXPECT_EQ(res.size(), 4) << RED << "MORE THAN 4 UNIQUE 3-MERS INDEXED" << RESET << std::endl;
     for(auto& [key, val] : exp) {
-        EXPECT_NE(res.find(key), res.end()) << RED << "RES DIDN'T INDEX: " << key << RESET << std::endl;
-        EXPECT_EQ(res[key], val) << RED << "RES INDEXED WRONG COUNT OF: " << key << RESET << std::endl;
+        EXPECT_NE(res.find(key), res.end()) << RED << "RES DIDN'T INDEX: " << meow(key) << RESET << std::endl;
+        EXPECT_EQ(res[key], val) << RED << "RES INDEXED WRONG COUNT OF: " << meow(key) << RESET << std::endl;
     }
 }
 
@@ -178,8 +178,8 @@ TEST(FX_UTIL, COUNT_KMER_NORMAL_2) {
     res = count_kmer(reads, 2);
     EXPECT_EQ(res.size(), 6) << RED << "NOT 6 UNIQUE 2-MERS INDEXED" << RESET << std::endl;
     for(auto& [key, val] : exp) {
-        EXPECT_NE(res.find(key), res.end()) << RED << "RES DIDN'T INDEX: " << key << RESET << std::endl;
-        EXPECT_EQ(res[key], val) << RED << "RES INDEXED WRONG COUNT OF: " << key << RESET << std::endl;
+        EXPECT_NE(res.find(key), res.end()) << RED << "RES DIDN'T INDEX: " << meow(key) << RESET << std::endl;
+        EXPECT_EQ(res[key], val) << RED << "RES INDEXED WRONG COUNT OF: " << meow(key) << RESET << std::endl;
     }
 }
 
@@ -241,10 +241,10 @@ TEST(FX_UTIL, INDEX_KMER_NORMAL_1) {
     res = index_kmer(reads, 3);
     EXPECT_EQ(res.size(), 4) << RED << "MORE THAN 4 UNIQUE 3-MERS INDEXED" << RESET << std::endl;
     for(auto& [key, val] : exp) {
-        EXPECT_NE(res.find(key), res.end()) << RED << "RES DIDN'T INDEX: " << key << RESET << std::endl;
-        EXPECT_EQ(val.size(), res[key].size()) << RED << "RES INDEXED A DIFFERENT COUNT OF KEY: " << key << RESET << std::endl;
+        EXPECT_NE(res.find(key), res.end()) << RED << "RES DIDN'T INDEX: " << meow(key) << RESET << std::endl;
+        EXPECT_EQ(val.size(), res[key].size()) << RED << "RES INDEXED A DIFFERENT COUNT OF KEY: " << meow(key) << RESET << std::endl;
         for(auto& index : val) {
-            EXPECT_TRUE(res[key].count(index)) << RED << "RES AT KEY: " << key << " DIDN'T GET INDEX: " << index << RESET << std::endl;
+            EXPECT_TRUE(res[key].count(index)) << RED << "RES AT KEY: " << meow(key) << " DIDN'T GET INDEX: " << index << RESET << std::endl;
         }
     }
 }
@@ -271,10 +271,10 @@ TEST(FX_UTIL, INDEX_KMER_NORMAL_2) {
     res = index_kmer(reads, 2);
     EXPECT_EQ(res.size(), 6) << RED << "MORE THAN 6 UNIQUE 2-MERS INDEXED" << RESET << std::endl;
     for(auto& [key, val] : exp) {
-        EXPECT_NE(res.find(key), res.end()) << RED << "RES DIDN'T INDEX: " << key << RESET << std::endl;
-        EXPECT_EQ(val.size(), res[key].size()) << RED << "RES INDEXED A DIFFERENT COUNT OF KEY: " << key << RESET << std::endl;
+        EXPECT_NE(res.find(key), res.end()) << RED << "RES DIDN'T INDEX: " << meow(key) << RESET << std::endl;
+        EXPECT_EQ(val.size(), res[key].size()) << RED << "RES INDEXED A DIFFERENT COUNT OF KEY: " << meow(key) << RESET << std::endl;
         for(auto& index : val) {
-            EXPECT_TRUE(res[key].count(index)) << RED << "RES AT KEY: " << key << " DIDN'T GET INDEX: " << index << RESET << std::endl;
+            EXPECT_TRUE(res[key].count(index)) << RED << "RES AT KEY: " << meow(key) << " DIDN'T GET INDEX: " << index << RESET << std::endl;
         }
     }
 }

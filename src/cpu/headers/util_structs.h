@@ -5,11 +5,13 @@
 
 struct alignment {
 public:
+    alignment();
+    alignment(int s, int erf, int erd, std::string* arf, std::string* ard);
     int score;
     int end_ref;
     int end_read;
-    std::string& aligned_ref;
-    std::string& aligned_read;
+    std::string* aligned_ref;
+    std::string* aligned_read;
 
 };
 

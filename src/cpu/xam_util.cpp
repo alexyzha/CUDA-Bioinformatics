@@ -1,4 +1,5 @@
 #include "headers/xam_util.h"
+#include "headers/util_structs.h"
 
 void sam_read_to_file(std::ofstream& out, sam_read& read) {
     auto [tags, qname, rname, cigar, rnext, seq, qual, flags, pos, posnext, tlen, mapq] = read;
@@ -41,9 +42,9 @@ std::string make_cigar(alignment& align) {
     std::string cigar;
     char prev = '\0';
     int count = 0;
-    for(size_t i = 0; i < align.aligned_ref.size(); ++i) {
-        char rf = align.aligned_ref[i];
-        char rd = align.aligned_read[i];
+    for(size_t i = 0; i < (*align.aligned_ref).size(); ++i) {
+        char rf = (*align.aligned_ref)[i];
+        char rd = (*align.aligned_read)[i];
         char cur;
         if(rf == '-') {
             cur = 'I';
@@ -117,7 +118,7 @@ std::vector<sam_read*> map_reads_to_ref(std::string& ref, std::string ref_id, st
             if(align.score > best_score) {
                 best_score = align.score;
                 best_align = align;
-                best_pos_global = c + align.end_ref - align.aligned_ref.size() + 1;
+                best_pos_global = c + align.end_ref - (*align.aligned_ref).size() + 1;
             }
         }
 

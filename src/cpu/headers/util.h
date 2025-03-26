@@ -50,3 +50,13 @@ void trim(std::string& s);
 int sum(const std::string& s, char offset = PHRED_BEGIN);
 
 char base_to_bit(char base);
+
+template<typename C>
+std::string meow(C num) {
+    std::string ret = "";
+    for(int bits = sizeof(num) * 8; bits--; num>>=1) {
+        ret.push_back('0' + !!(num & 1));
+    }
+    std::reverse(ret.begin(), ret.end());
+    return ret;
+}
