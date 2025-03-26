@@ -226,12 +226,12 @@ std::vector<std::unordered_set<int>*> cluster_by_kmer(std::unordered_map<uint64_
     for(auto& [kmer, reads] : kmer_map) {
         for(auto i = reads.begin(); i != reads.end(); ++i) {
             for(auto j = std::next(i); j != reads.end(); ++j) {
+                // Only count once
                 ++overlaps[*i][*j];
-                ++overlaps[*j][*i];
             }
         }
     }
-    union_find* uf;
+    union_find* uf = new union_find();
     for(auto& [i, row] : overlaps) {
         for(auto& [j, shared] : row) {
             if(shared >= THRESH) {
@@ -240,9 +240,15 @@ std::vector<std::unordered_set<int>*> cluster_by_kmer(std::unordered_map<uint64_
         }
     }
     // Convert to islands
-    std::vector<std::unordered_set<int>*> islands(READS);
+    std::vector<std::unordered_set<int>*> islands(READS, nullptr);
     for(int i = 0; i < READS; ++i) {
         int root = uf->find(i);
+        if(root == i) {
+            continue;
+        }
+        if(!islands[root]) {
+            islands[root] = new std::unordered_set<int>();
+        }
         islands[root]->insert(i);
     }
     return islands;

@@ -302,13 +302,89 @@ TEST(FX_UTIL, LOCAL_ALIGN_MATCH_MIDDLE) {
 }
 
 TEST(FX_UTIL, LOCAL_ALIGN_MISMATCH) {
-
+    std::string ref = "GAAAAGTC";
+    std::string read = "GAACA";
+    alignment align = local_align(ref, read);
+    EXPECT_EQ(align.score, 7) << RED << "CHECK ALIGNMENT SCORE CALC" << RESET << std::endl;
+    EXPECT_EQ(align.end_ref, 4) << RED << "END REFERENCE INDEX INCORRECT" << RESET << std::endl;
+    EXPECT_EQ(align.end_read, 4) << RED << "END READ INDEX INCORRECT" << RESET << std::endl;
+    EXPECT_EQ((*align.aligned_ref), "GAAAA") << RED << "PROCESSED REFERENCE SEQ INCORRECT" << RESET << std::endl;
+    EXPECT_EQ((*align.aligned_read), read) << RED << "PROCESSED READ SEQ INCORRECT" << RESET << std::endl;
 }
 
-TEST(FX_UTIL, LOCAL_ALIGN_GAP) {
+TEST(FX_UTIL, LOCAL_ALIGN_GAP_IN_READ) {
+    std::string ref = "GCTAGCT";
+    std::string read = "GCTGCT";
+    alignment align = local_align(ref, read);
+    EXPECT_EQ(align.score, 10) << RED << "CHECK ALIGNMENT SCORE CALC" << RESET << std::endl;
+    EXPECT_EQ(align.end_ref, 6) << RED << "END REFERENCE INDEX INCORRECT" << RESET << std::endl;
+    EXPECT_EQ(align.end_read, 5) << RED << "END READ INDEX INCORRECT" << RESET << std::endl;
+    EXPECT_EQ((*align.aligned_ref), ref) << RED << "PROCESSED REFERENCE SEQ INCORRECT" << RESET << std::endl;
+    EXPECT_EQ((*align.aligned_read), "GCT-GCT") << RED << "PROCESSED READ SEQ INCORRECT" << RESET << std::endl;
+}
 
+TEST(FX_UTIL, LOCAL_ALIGN_GAP_IN_REF) {
+    std::string ref = "ATAGCT";
+    std::string read = "ATATGCT";
+    alignment align = local_align(ref, read);
+    EXPECT_EQ(align.score, 10) << RED << "CHECK ALIGNMENT SCORE CALC" << RESET << std::endl;
+    EXPECT_EQ(align.end_ref, 5) << RED << "END REFERENCE INDEX INCORRECT" << RESET << std::endl;
+    EXPECT_EQ(align.end_read, 6) << RED << "END READ INDEX INCORRECT" << RESET << std::endl;
+    EXPECT_EQ((*align.aligned_ref), "ATA-GCT") << RED << "PROCESSED REFERENCE SEQ INCORRECT" << RESET << std::endl;
+    EXPECT_EQ((*align.aligned_read), read) << RED << "PROCESSED READ SEQ INCORRECT" << RESET << std::endl;
+}
+
+TEST(FX_UTIL, LOCAL_ALIGN_MULTI_ALIGN_GAP) {
+    std::string ref = "ATAGCT";
+    std::string read = "ATAAGCT";
+    alignment align = local_align(ref, read);
+    EXPECT_EQ(align.score, 10) << RED << "CHECK ALIGNMENT SCORE CALC" << RESET << std::endl;
+    EXPECT_EQ(align.end_ref, 5) << RED << "END REFERENCE INDEX INCORRECT" << RESET << std::endl;
+    EXPECT_EQ(align.end_read, 6) << RED << "END READ INDEX INCORRECT" << RESET << std::endl;
+    EXPECT_EQ((*align.aligned_ref), "AT-AGCT") << RED << "PROCESSED REFERENCE SEQ INCORRECT" << RESET << std::endl;
+    EXPECT_EQ((*align.aligned_read), read) << RED << "PROCESSED READ SEQ INCORRECT" << RESET << std::endl;
+}
+
+TEST(FX_UTIL, LOCAL_ALIGN_EMPTY) {
+    std::string ref = "";
+    std::string read = "";
+    alignment align = local_align(ref, read);
+    EXPECT_EQ(align.score, 0) << RED << "EMPTY ALIGN SCORE EXP 0" << RESET << std::endl;
+    EXPECT_EQ(align.end_ref, -1) << RED << "EMPTY ALIGN END REF EXP 0" << RESET << std::endl;
+    EXPECT_EQ(align.end_read, -1) << RED << "EMPTY ALIGN END READ EXP 0" << RESET << std::endl;
+    EXPECT_EQ((*align.aligned_ref), "") << RED << "EMPTY ALIGN REF EXP EMPTY STRING" << RESET << std::endl;
+    EXPECT_EQ((*align.aligned_read), "") << RED << "EMPTY ALIGN READ EXP EMPTY STRING" << RESET << std::endl;
 }
 
 TEST(FX_UTIL, CLUSTER_BY_KMER) {
     // This is an integration test technically
+    std::vector<fq_read*> reads;
+    std::vector<std::string> seqs = {
+        "ACG", "GAT", "CAT", "CAG", "ACG"
+    };
+    std::unordered_map<uint64_t, std::unordered_set<int>> kmer_map;
+    for(int i = 0; i < 5; ++i) {
+        reads.push_back(
+            new fq_read("ID" + std::to_string(i),
+            3,
+            seqs[i],
+            "???",
+            "")
+        );
+    }
+    kmer_map = index_kmer(reads, 2);
+    std::vector<std::unordered_set<int>*> res = cluster_by_kmer(kmer_map, reads.size(), 2);
+    EXPECT_NE([&]() {
+        return res[0] ? res[0] : res[4];
+    }(), nullptr) << RED << "EXP SET IN [0] OR [4], NULLPTR EVERYWHERE ELSE" << RESET << std::endl;
+    for(int i = 0; i <= 3; ++i) {
+        EXPECT_EQ(res[i], nullptr) << RED << "EXP NULLPTR AT RES[" << i << "]" << RESET << std::endl;
+    }
+    if(res[0]) {
+        EXPECT_EQ(res[0]->size(), 1) << RED << "MORE THAN 1 CHILD INDEXED AT RES[0]" << RESET << std::endl;
+        EXPECT_TRUE(res[0]->count(4)) << RED << "4 NOT INDEXED AS CHILD AT RES[0]" << RESET << std::endl;
+    } else if(res[4]) {
+        EXPECT_EQ(res[4]->size(), 1) << RED << "MORE THAN 1 CHILD INDEXED AT RES[4]" << RESET << std::endl;
+        EXPECT_TRUE(res[4]->count(0)) << RED << "0 NOT INDEXED AS CHILD AT RES[4]" << RESET << std::endl;
+    }
 }
