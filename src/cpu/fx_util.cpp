@@ -191,34 +191,34 @@ alignment local_align(const std::string& ref, const std::string& read) {
             }
         }
     }
-    std::string aligned_ref = "";
-    std::string aligned_read = "";
+    std::string* aligned_ref = new std::string("");
+    std::string* aligned_read = new std::string("");
     int i = max_i;
     int j = max_j;
     while(i > 0 && j > 0 && dp[i][j] > 0) {
         int score = dp[i][j];
         int match = ref[i - 1] == read[j - 1] ? ALN_MATCH : ALN_MISMATCH;
         if(score == dp[i - 1][j - 1] + match) {
-            aligned_ref.push_back(ref[i - 1]);
-            aligned_read.push_back(read[j - 1]);
+            aligned_ref->push_back(ref[i - 1]);
+            aligned_read->push_back(read[j - 1]);
             --i;
             --j;
         } else if(score == dp[i - 1][j] + ALN_GAP) {
-            aligned_ref.push_back(ref[i - 1]);
-            aligned_read.push_back('-');
+            aligned_ref->push_back(ref[i - 1]);
+            aligned_read->push_back('-');
             --i;
         } else if(score == dp[i][j - 1] + ALN_GAP) {
-            aligned_ref.push_back('-');
-            aligned_read.push_back(read[j - 1]);
+            aligned_ref->push_back('-');
+            aligned_read->push_back(read[j - 1]);
             --j;
         } else {
             // erm, what the sigma?
             break;
         }
     }
-    std::reverse(aligned_ref.begin(), aligned_ref.end());
-    std::reverse(aligned_read.begin(), aligned_read.end());
-    return {max_score, max_i - 1, max_j - 1, &aligned_ref, &aligned_read};
+    std::reverse(aligned_ref->begin(), aligned_ref->end());
+    std::reverse(aligned_read->begin(), aligned_read->end());
+    return {max_score, max_i - 1, max_j - 1, aligned_ref, aligned_read};
 }
 
 std::vector<std::unordered_set<int>*> cluster_by_kmer(std::unordered_map<uint64_t, std::unordered_set<int>>& kmer_map, int READS, int THRESH) {

@@ -279,3 +279,36 @@ TEST(FX_UTIL, INDEX_KMER_NORMAL_2) {
     }
 }
 
+TEST(FX_UTIL, LOCAL_ALIGN_MATCH) {
+    std::string ref = "GATCATC";
+    std::string read = "GATC";
+    alignment align = local_align(ref, read);
+    EXPECT_EQ(align.score, 8) << RED << "CHECK ALIGNMENT SCORE CALC" << RESET << std::endl;
+    EXPECT_EQ(align.end_ref, 3) << RED << "END REFERENCE INDEX INCORRECT" << RESET << std::endl;
+    EXPECT_EQ(align.end_read, 3) << RED << "END READ INDEX INCORRECT" << RESET << std::endl;
+    EXPECT_EQ((*align.aligned_ref), read) << RED << "PROCESSED REFERENCE SEQ INCORRECT" << RESET << std::endl;
+    EXPECT_EQ((*align.aligned_read), read) << RED << "PROCESSED READ SEQ INCORRECT" << RESET << std::endl;
+}
+
+TEST(FX_UTIL, LOCAL_ALIGN_MATCH_MIDDLE) {
+    std::string ref = "GAAAAGTC";
+    std::string read = "AAAA";
+    alignment align = local_align(ref, read);
+    EXPECT_EQ(align.score, 8) << RED << "CHECK ALIGNMENT SCORE CALC" << RESET << std::endl;
+    EXPECT_EQ(align.end_ref, 4) << RED << "END REFERENCE INDEX INCORRECT" << RESET << std::endl;
+    EXPECT_EQ(align.end_read, 3) << RED << "END READ INDEX INCORRECT" << RESET << std::endl;
+    EXPECT_EQ((*align.aligned_ref), read) << RED << "PROCESSED REFERENCE SEQ INCORRECT" << RESET << std::endl;
+    EXPECT_EQ((*align.aligned_read), read) << RED << "PROCESSED READ SEQ INCORRECT" << RESET << std::endl;
+}
+
+TEST(FX_UTIL, LOCAL_ALIGN_MISMATCH) {
+
+}
+
+TEST(FX_UTIL, LOCAL_ALIGN_GAP) {
+
+}
+
+TEST(FX_UTIL, CLUSTER_BY_KMER) {
+    // This is an integration test technically
+}
