@@ -11,3 +11,6 @@ prune:
 
 delete:
 	docker rmi -f cuda-qcb
+
+linux:
+	docker run --runtime=nvidia --gpus all --platform linux/amd64 -it --rm -v $(shell pwd)/:/src cuda-qcb
