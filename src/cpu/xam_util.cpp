@@ -50,6 +50,8 @@ std::string make_cigar(alignment& align) {
             cur = 'I';
         } else if(rd == '-') {
             cur = 'D';
+        } else if(rd != rf) {
+            cur = 'X';
         } else {
             cur = 'M';
         }

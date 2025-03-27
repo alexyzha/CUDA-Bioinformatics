@@ -172,3 +172,75 @@ TEST(XAM_UTIL, SAM_CONTAINER_TO_FILE_SORTED_READS) {
     EXPECT_FALSE(std::getline(in, line));
     in.close();
 }
+
+TEST(XAM_UTIL, CIGAR_COMPLETE_MATCH) {
+    std::string* ref = new std::string("AAAA");
+    std::string* read = new std::string("AAAA");
+    std::string exp = "4M";
+    alignment align(0, 0, 0, ref, read);
+    std::string cigar = make_cigar(align);
+    EXPECT_EQ(cigar, exp) << RED << "CIGAR SHOULD = 4M, NOT [" << cigar << "]" << RESET << std::endl; 
+}
+
+TEST(XAM_UTIL, CIGAR_MISMATCH) {
+    std::string* ref = new std::string("AAAGA");
+    std::string* read = new std::string("AAAAA");
+    std::string exp = "3M1X1M";
+    alignment align(0, 0, 0, ref, read);
+    std::string cigar = make_cigar(align);
+    EXPECT_EQ(cigar, exp) << RED << "CIGAR SHOULD = 3M1X1M, NOT [" << cigar << "]" << RESET << std::endl; 
+}
+
+TEST(XAM_UTIL, CIGAR_REF_GAP) {
+    std::string* ref = new std::string("AAA-A");
+    std::string* read = new std::string("AAAAA");
+    std::string exp = "3M1I1M";
+    alignment align(0, 0, 0, ref, read);
+    std::string cigar = make_cigar(align);
+    EXPECT_EQ(cigar, exp) << RED << "CIGAR SHOULD = 3M1I1M, NOT [" << cigar << "]" << RESET << std::endl; 
+}
+
+TEST(XAM_UTIL, CIGAR_READ_GAP) {
+    std::string* ref = new std::string("AAAAA");
+    std::string* read = new std::string("AA-AA");
+    std::string exp = "2M1D2M";
+    alignment align(0, 0, 0, ref, read);
+    std::string cigar = make_cigar(align);
+    EXPECT_EQ(cigar, exp) << RED << "CIGAR SHOULD = 2M1D2M, NOT [" << cigar << "]" << RESET << std::endl; 
+}
+
+TEST(XAM_UTIL, CIGAR_MULTI_MISMATCH) {
+    std::string* ref = new std::string("ACTGA");
+    std::string* read = new std::string("AAAAA");
+    std::string exp = "1M3X1M";
+    alignment align(0, 0, 0, ref, read);
+    std::string cigar = make_cigar(align);
+    EXPECT_EQ(cigar, exp) << RED << "CIGAR SHOULD = 1M3X1M, NOT [" << cigar << "]" << RESET << std::endl; 
+}
+
+TEST(XAM_UTIL, CIGAR_MULTI_REF_GAP) {
+    std::string* ref = new std::string("AA--A");
+    std::string* read = new std::string("AAAAA");
+    std::string exp = "2M2I1M";
+    alignment align(0, 0, 0, ref, read);
+    std::string cigar = make_cigar(align);
+    EXPECT_EQ(cigar, exp) << RED << "CIGAR SHOULD = 2M2I1M, NOT [" << cigar << "]" << RESET << std::endl; 
+}
+
+TEST(XAM_UTIL, CIGAR_MULTI_READ_GAP) {
+    std::string* ref = new std::string("AAAAA");
+    std::string* read = new std::string("A--AA");
+    std::string exp = "1M2D2M";
+    alignment align(0, 0, 0, ref, read);
+    std::string cigar = make_cigar(align);
+    EXPECT_EQ(cigar, exp) << RED << "CIGAR SHOULD = 1M2D2M, NOT [" << cigar << "]" << RESET << std::endl; 
+}
+
+TEST(XAM_UTIL, CIGAR_ALL_ALLOWED) {
+    std::string* ref = new std::string("ACG---CGT--ACG-TAGC");
+    std::string* read = new std::string("GCGACTT--ACACGATA--");
+    std::string exp = "1X2M3I1X2D2I3M1I2M2D";
+    alignment align(0, 0, 0, ref, read);
+    std::string cigar = make_cigar(align);
+    EXPECT_EQ(cigar, exp) << RED << "CIGAR SHOULD = 1X2M3I1X2D2I3M1I2M2D, NOT [" << cigar << "]" << RESET << std::endl;
+}
