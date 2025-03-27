@@ -1,12 +1,14 @@
-$(shell mkdir -p $(./obj))
+OBJ_DIR = ./obj
+
+$(shell mkdir -p $(OBJ_DIR))
 
 target: clean cpu gpu
 
 cpu:
-	g++ -std=c++17 helloworld.cpp -o ./obj/helloworld
+	g++ -std=c++17 helloworld.cpp -o $(OBJ_DIR)/helloworld
 
 gpu:
-	nvcc helloworld.cu -o ./obj/cu_helloworld
+	nvcc helloworld.cu -o $(OBJ_DIR)/cu_helloworld
 
 clean:
-	rm -rf $(./obj)/*.o $(helloworld cu_helloworld)
+	rm -rf $(OBJ_DIR)/*.o $(OBJ_DIR)/helloworld $(OBJ_DIR)/cu_helloworld
