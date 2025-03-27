@@ -55,7 +55,7 @@ char base_to_bit(char base) {
         case 'T':
             return 0b11;
         default:
-            std::cerr << "INPUT INCLUDES A NON-ACGT BASE" << std::endl;
+            // std::cerr << "INPUT INCLUDES A NON-ACGT BASE" << std::endl;
             return 0x80;
     }
 }

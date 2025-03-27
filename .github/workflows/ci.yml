@@ -65,18 +65,18 @@ jobs:
       run: |
         docker run --platform linux/amd64 -i --rm \
           -v ${{ github.workspace }}:/src \
-          -w /src/tests/fastx \
+          -w /src/tests/cpu \
           cuda-qcb:latest \
-          bash -c "make clean && make && ./obj/all_tests --gtest_output=xml:report.xml"
+          bash -c "make clean && make && ./obj/all_cpu_tests --gtest_output=xml:all_cpu_report.xml"
 
-    - name: Upload FASTX GTEST XML Report
+    - name: Upload All CPU GTEST XML Report
       uses: actions/upload-artifact@v4
       with:
         name: gtest-report
-        path: tests/fastx/report.xml
+        path: tests/cpu/all_cpu_report.xml
 
-    - name: Publish FASTX GTEST XML Report
+    - name: Publish All CPU GTEST XML Report
       uses: EnricoMi/publish-unit-test-result-action@v2
       with:
-        files: tests/fastx/report.xml
-        check_name: "FASTX Test Results (CPU)"
+        files: tests/cpu/all_cpu_report.xml
+        check_name: "All CPU Test Results (CPU)"

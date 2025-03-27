@@ -4,12 +4,12 @@
 TEST(UTIL_S, ALIGNMENT) {
     std::string ref = "ABC";
     std::string read = "123";
-    alignment test_align = {1, 2, 3, ref, read};
+    alignment test_align = {1, 2, 3, &ref, &read};
     EXPECT_EQ(test_align.score, 1) << RED << "WRONG ALIGNMENT SCORE" << RESET << std::endl;
     EXPECT_EQ(test_align.end_ref, 2) << RED << "WRONG END REF" << RESET << std::endl;
     EXPECT_EQ(test_align.end_read, 3) << RED << "WRONG END READ" << RESET << std::endl;
-    EXPECT_EQ(test_align.aligned_ref, ref) << RED << "WRONG REF SEQ" << RESET << std::endl;
-    EXPECT_EQ(test_align.aligned_read, read) << RED << "WRONG READ SEQ" << RESET << std::endl;
+    EXPECT_EQ((*test_align.aligned_ref), ref) << RED << "WRONG REF SEQ" << RESET << std::endl;
+    EXPECT_EQ((*test_align.aligned_read), read) << RED << "WRONG READ SEQ" << RESET << std::endl;
 }
 
 TEST(UTIL_S, UNION_FIND) {

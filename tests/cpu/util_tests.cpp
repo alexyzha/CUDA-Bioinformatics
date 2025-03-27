@@ -26,7 +26,7 @@ TEST(UTIL, SPLIT_BY_DNE) {
     EXPECT_NO_THROW([&](){
         ret = split_by(test_str, '\t');
     }()) << RED << "BAD ASSIGNMENT, EXP NO THROW" << RESET << std::endl;
-    EXPECT_EQ({test_str}, ret) << RED << "SPLIT != EXP RESULT" << RESET << std::endl;
+    EXPECT_EQ(std::vector<std::string>{test_str}, ret) << RED << "SPLIT != EXP RESULT" << RESET << std::endl;
 }
 
 TEST(UTIL, TRIM) {
@@ -37,9 +37,21 @@ TEST(UTIL, TRIM) {
 }
 
 TEST(UTIL, BASE2BIT) {
-    EXPECT_EQ(base_to_bit('A'), 0x00) << RED << "BASE->BIT CONVERTS A WRONG" << RESET << std::endl;
-    EXPECT_EQ(base_to_bit('C'), 0x01) << RED << "BASE->BIT CONVERTS C WRONG" << RESET << std::endl;
-    EXPECT_EQ(base_to_bit('G'), 0x10) << RED << "BASE->BIT CONVERTS G WRONG" << RESET << std::endl;
-    EXPECT_EQ(base_to_bit('T'), 0x11) << RED << "BASE->BIT CONVERTS T WRONG" << RESET << std::endl;
-    EXPECT_EQ(base_to_bit('U'), 0x80) << RED << "BASE->BIT CONVERTS *[!=ACGT] WRONG" << RESET << std::endl;
+    EXPECT_EQ(base_to_bit('A'), 0b00) << RED << "BASE->BIT CONVERTS A WRONG" << RESET << std::endl;
+    EXPECT_EQ(base_to_bit('C'), 0b01) << RED << "BASE->BIT CONVERTS C WRONG" << RESET << std::endl;
+    EXPECT_EQ(base_to_bit('G'), 0b10) << RED << "BASE->BIT CONVERTS G WRONG" << RESET << std::endl;
+    EXPECT_EQ(base_to_bit('T'), 0b11) << RED << "BASE->BIT CONVERTS T WRONG" << RESET << std::endl;
+    EXPECT_EQ(static_cast<unsigned char>(base_to_bit('U')), 0x80) << RED << "BASE->BIT CONVERTS *[!=ACGT] WRONG" << RESET << std::endl;
+}
+
+TEST(UTIL, MEOW) {
+    std::string exp = "";
+    int in = 0;
+    for(int i = 0; i < 32; ++i) {
+        int lsb = rand() % 2;
+        in <<= 1;
+        in |= lsb;
+        exp.push_back('0' + lsb);
+    }
+    EXPECT_EQ(exp, meow(in));
 }

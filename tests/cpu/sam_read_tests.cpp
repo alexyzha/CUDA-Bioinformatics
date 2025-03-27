@@ -1,11 +1,12 @@
 #include <gtest/gtest.h>
-#include "../../src/sam_read.h"
+#include "../../src/cpu/headers/sam_read.h"
 
 TEST(SAM_READ, CONSTRUCTOR_NORMAL) {
-    sam_read read;
-    EXPECT_NO_THROW([&]() {
-        read = sam_read({}, "A", "B", "C", "D", "E", "F", 7, 8, 9, 10, 'K');
-    }()) << RED << "NORMAL CONSTRUCTOR FAILED" << std::endl;
+    sam_read read = sam_read{
+        std::vector<std::string>{}, 
+        "A", "B", "C", "D", "E", "F", 
+        7, 8, 9, 10, 'K'
+    };
     EXPECT_TRUE(read.tags.empty()) << RED << "TAGS SOMEHOW NOT EMPTY" << std::endl;
     EXPECT_EQ(read.qname, "A") << RED << "QNAME MISMATCH" << std::endl;
     EXPECT_EQ(read.rname, "B") << RED << "RNAME MISMATCH" << std::endl;
@@ -21,10 +22,11 @@ TEST(SAM_READ, CONSTRUCTOR_NORMAL) {
 }
 
 TEST(SAM_READ, CONSTRUCTOR_AGG_EV) {
-    sam_read read;
-    EXPECT_NO_THROW([&](){
-        read = {{}, "A", "B", "C", "D", "E", "F", 7, 8, 9, 10, 'K'};
-    }()) << RED << "AGG CONSTRUCTOR FAILED" << std::endl;
+    sam_read read = {
+        std::vector<std::string>{}, 
+        "A", "B", "C", "D", "E", "F", 
+        7, 8, 9, 10, 'K'
+    };
     EXPECT_TRUE(read.tags.empty()) << RED << "TAGS SOMEHOW NOT EMPTY" << std::endl;
     EXPECT_EQ(read.qname, "A") << RED << "QNAME MISMATCH" << std::endl;
     EXPECT_EQ(read.rname, "B") << RED << "RNAME MISMATCH" << std::endl;
@@ -40,12 +42,16 @@ TEST(SAM_READ, CONSTRUCTOR_AGG_EV) {
 }
 
 TEST(SAM_READ, CONSTRUCTOR_AGG_FV) {
-    sam_read read;
-    EXPECT_NO_THROW([&](){
-        read = {{"L", "M", "N"}, "A", "B", "C", "D", "E", "F", 7, 8, 9, 10, 'K'};
-    }()) << RED << "NESTED AGG CONSTRUCTOR FAILED" << std::endl;
+    std::vector<std::string> exp_tags = {"L", "M", "N"};
+    sam_read read = {
+        std::vector<std::string>{"L", "M", "N"}, 
+        "A", "B", "C", "D", "E", "F", 
+        7, 8, 9, 10, 'K'
+    };
     EXPECT_EQ(read.tags.size(), 3) << RED << "TAGS HAS INCORRECT NUMBER OF ITEMS" << std::endl;
-    EXPECT_EQ(read.tags, {"L", "M", "N"}) << RED << "TAGS ITEM MISMATCH" << std::endl;
+    for(int i = 0; i < 3; ++i) {
+        EXPECT_EQ(read.tags[i], exp_tags[i]) << RED << "TAGS ITEM MISMATCH AT [" << i << "]" << std::endl;
+    }
     EXPECT_EQ(read.qname, "A") << RED << "QNAME MISMATCH" << std::endl;
     EXPECT_EQ(read.rname, "B") << RED << "RNAME MISMATCH" << std::endl;
     EXPECT_EQ(read.cigar, "C") << RED << "CIGAR MISMATCH" << std::endl;
@@ -60,13 +66,18 @@ TEST(SAM_READ, CONSTRUCTOR_AGG_FV) {
 }
 
 TEST(SAM_READ, SB_ACCESS) {
-    sam_read read;
-    EXPECT_NO_THROW([&](){
-        read = {{"L", "M", "N"}, "A", "B", "C", "D", "E", "F", 7, 8, 9, 10, 'K'};
-    }()) << RED << "NESTED AGG CONSTRUCTOR FAILED" << std::endl;
+    std::vector<std::string> exp_tags = {"L", "M", "N"};
+    sam_read read = {
+        std::vector<std::string>{"L", "M", "N"}, 
+        "A", "B", "C", "D", "E", "F", 
+        7, 8, 9, 10, 'K'
+    };
     auto [tags, qname, rname, cigar, rnext, seq, qual, flags, pos, posnext, tlen, mapq] = read;
     EXPECT_EQ(tags.size(), 3) << RED << "SB TAGS HAS INCORRECT NUMBER OF ITEMS" << std::endl;
-    EXPECT_EQ(tags, {"L", "M", "N"}) << RED << "SB TAGS ITEM MISMATCH" << std::endl;
+    EXPECT_EQ(read.tags.size(), 3) << RED << "TAGS HAS INCORRECT NUMBER OF ITEMS" << std::endl;
+    for(int i = 0; i < 3; ++i) {
+        EXPECT_EQ(read.tags[i], exp_tags[i]) << RED << "SB TAGS ITEM MISMATCH AT [" << i << "]" << std::endl;
+    }
     EXPECT_EQ(qname, "A") << RED << "SB QNAME MISMATCH" << std::endl;
     EXPECT_EQ(rname, "B") << RED << "SB RNAME MISMATCH" << std::endl;
     EXPECT_EQ(cigar, "C") << RED << "SB CIGAR MISMATCH" << std::endl;
