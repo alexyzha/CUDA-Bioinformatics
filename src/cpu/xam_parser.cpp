@@ -12,11 +12,11 @@ std::vector<sam_read*> read_sam(std::string file_path) {
         if(cur_line.empty() || cur_line[0] == '@') {
             continue;
         }
-        std::vector<std::string> read_line = split_by(cur_line, '\n');
+        std::vector<std::string> read_line = split_by(cur_line, '\t');
         reads.push_back(new sam_read{
             [&](){                                                              // Lambda to clearly separate this section
                 return read_line.size() >= 12 
-                    ? std::vector<std::string>(read_line.begin() + 12, read_line.end())
+                    ? std::vector<std::string>(read_line.begin() + 11, read_line.end())
                     : std::vector<std::string>();
             }(), 
             read_line[0],

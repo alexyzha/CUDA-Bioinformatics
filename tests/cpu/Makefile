@@ -41,6 +41,8 @@ TEST_FILES = \
 OBJ_FILES = $(patsubst %.cpp, $(OBJ_DIR)/%.o, $(notdir $(SRC_FILES) $(TEST_FILES)))
 OUTPUT = $(OBJ_DIR)/all_cpu_tests
 
+target: clean test
+
 all: $(OUTPUT)
 
 $(OBJ_DIR)/%.o: $(SRC_DIR)/%.cpp

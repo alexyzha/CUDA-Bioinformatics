@@ -67,7 +67,7 @@ jobs:
           -v ${{ github.workspace }}:/src \
           -w /src/tests/cpu \
           cuda-qcb:latest \
-          bash -c "make clean && make && ./obj/all_cpu_tests --gtest_output=xml:all_cpu_report.xml"
+          bash -c "make clean && make all && ./obj/all_cpu_tests --gtest_output=xml:all_cpu_report.xml"
 
     - name: Upload All CPU GTEST XML Report
       uses: actions/upload-artifact@v4

@@ -6,8 +6,15 @@ __global__ void hello() {
 
 int main(int argc, char* argv[]) {
 
+    printf("INIT\n");
+    
     hello<<<7,7>>>();
-    cudaDeviceSynchronize();
+    
+    cudaError_t err = cudaDeviceSynchronize();
+    if(err != cudaSuccess) {
+        fprintf(stderr, "CUDA ERR: %s\n", cudaGetErrorString(err));
+        return -1;
+    }
 
     return 0;
 }
