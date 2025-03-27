@@ -150,7 +150,7 @@ void sam_to_vcf(std::string file_path, std::string& ref, std::string ref_id, std
 
     // Headers
     file << "##fileformat=VCFv4.2\n";
-    file << "##source=cubio";
+    file << "##source=cubio\n";
     file << "##reference=" << ref_id << "\n";
     file << "##CHROM\tPOS\tID\tREF\tALT\tQUAL\tFILTER\tINFO\n";
 

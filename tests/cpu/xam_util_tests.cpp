@@ -99,3 +99,76 @@ TEST(XAM_UTIL, SAM_TO_FILE_MULTI_SORTED) {
     EXPECT_FALSE(std::getline(in, line));
     in.close();
 }
+
+TEST(XAM_UTIL, SAM_CONTAINER_TO_FILE) {
+    sam_container cont("infiles/sam_parser_all_allowed_in.txt");
+    std::unordered_set<std::string> exp_header = {
+        "@CA\tHEADER1",
+        "@TZ\tHEADER2",
+        "@CA\tHEADER3",
+        "@TZ\tHEADER4",
+        "@FG\tHEADER5"
+    };
+    std::vector<std::string> exp = {
+        "ID1\t1\tREF1\t10\tA\tAIGAR\t=\t100\t1000\tAAA\t???\tTAG1",
+        "ID2\t2\tREF2\t20\tB\tBIGAR\t*\t200\t2000\tBBB\t?*!\tTAG2\tTAG2A",
+        "ID3\t3\tREF3\t30\tC\tCIGAR\t!\t300\t3000\tCCC\t!!!\tTAG3\tTAG3A\tTAG3B"
+    };
+    sam_to_file(cont, "outfiles/sam_container_out.txt");
+    // Validate output
+    std::ifstream in("outfiles/sam_container_out.txt");
+    EXPECT_TRUE(in.is_open()) << RED << "UNABLE TO OPEN FILE" << RESET << std::endl;
+    std::string line = "";
+    for(int i = 0; i < 5; ++i) {
+        std::getline(in, line);
+        trim(line);
+        EXPECT_TRUE(exp_header.count(line)) << RED << "UNEXPECTED HEADER IN OUTFILE" << RESET << std::endl;
+        exp_header.erase(line);
+    }
+    EXPECT_TRUE(exp_header.empty()) << RED << "MISSING HEADER(S) IN OUTPUT" << RESET << std::endl;
+    for(int i = 0; i < 3; ++i) {
+        std::getline(in, line);
+        trim(line);
+        EXPECT_EQ(line, exp[i]) << RED << "MISMATCH BETWEEN EXP AND ACTUAL OUTPUT ON LINE [" << i + 5 << "]" << RESET << std::endl;
+    }
+    EXPECT_FALSE(std::getline(in, line));
+    in.close();
+}
+
+TEST(XAM_UTIL, SAM_CONTAINER_TO_FILE_SORTED_READS) {
+    sam_container cont("infiles/sam_parser_all_allowed_in.txt");
+    std::unordered_set<std::string> exp_header = {
+        "@CA\tHEADER1",
+        "@TZ\tHEADER2",
+        "@CA\tHEADER3",
+        "@TZ\tHEADER4",
+        "@FG\tHEADER5"
+    };
+    std::vector<std::string> exp = {
+        "ID3\t3\tREF3\t30\tC\tCIGAR\t!\t300\t3000\tCCC\t!!!\tTAG3\tTAG3A\tTAG3B",
+        "ID2\t2\tREF2\t20\tB\tBIGAR\t*\t200\t2000\tBBB\t?*!\tTAG2\tTAG2A",
+        "ID1\t1\tREF1\t10\tA\tAIGAR\t=\t100\t1000\tAAA\t???\tTAG1"
+    };
+    cont.sort([&](sam_read* a, sam_read* b){
+        return a->qname > b->qname;
+    });
+    sam_to_file(cont, "outfiles/sam_container_sorted_out.txt");
+    // Validate output
+    std::ifstream in("outfiles/sam_container_sorted_out.txt");
+    EXPECT_TRUE(in.is_open()) << RED << "UNABLE TO OPEN FILE" << RESET << std::endl;
+    std::string line = "";
+    for(int i = 0; i < 5; ++i) {
+        std::getline(in, line);
+        trim(line);
+        EXPECT_TRUE(exp_header.count(line)) << RED << "UNEXPECTED HEADER IN OUTFILE" << RESET << std::endl;
+        exp_header.erase(line);
+    }
+    EXPECT_TRUE(exp_header.empty()) << RED << "MISSING HEADER(S) IN OUTPUT" << RESET << std::endl;
+    for(int i = 0; i < 3; ++i) {
+        std::getline(in, line);
+        trim(line);
+        EXPECT_EQ(line, exp[i]) << RED << "MISMATCH BETWEEN EXP AND ACTUAL OUTPUT ON LINE [" << i + 5 << "]" << RESET << std::endl;
+    }
+    EXPECT_FALSE(std::getline(in, line));
+    in.close();
+}
