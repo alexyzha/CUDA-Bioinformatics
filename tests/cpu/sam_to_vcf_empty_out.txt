@@ -1,0 +1,4 @@
+##fileformat=VCFv4.2
+##source=cubio
+##reference=REFID
+##CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO

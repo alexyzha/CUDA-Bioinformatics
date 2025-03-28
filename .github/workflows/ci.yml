@@ -1,4 +1,4 @@
-name: CPU TESTS ALL
+name: All CPU & GPU Tests
 
 on:
   push:
@@ -11,31 +11,31 @@ permissions:
   contents: read
 
 jobs:
-  docker_build_and_run:
+  BUILD_DOCKER_IMAGE_AND_RUN_TESTS:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Free Disk Space
+    - name: FREE DISK SPACE
       run: |
         sudo rm -rf /usr/share/dotnet
         sudo rm -rf /opt/ghc
         sudo rm -rf /usr/local/share/boost
         sudo rm -rf "$AGENT_TOOLSDIRECTORY"
 
-    - name: Checkout Code
+    - name: CHECKOUT CODE
       uses: actions/checkout@v3
 
-    - name: Docker Buildx
+    - name: DOCKER BUILDX
       uses: docker/setup-buildx-action@v3
 
-    - name: GitHub Container Registry
+    - name: USE GITHUB DOCKER CONTAINER REGISTRY
       uses: docker/login-action@v3
       with:
         registry: ghcr.io
         username: ${{ github.actor }}
         password: ${{ secrets.GITHUB_TOKEN }}
 
-    - name: Cache Docker Layers
+    - name: CACHE DOCKER LAYERS
       uses: actions/cache@v3
       with:
         path: /tmp/.buildx-cache
@@ -43,7 +43,7 @@ jobs:
         restore-keys: |
           ${{ runner.os }}-buildx-
 
-    - name: Build Docker Image w/ Cache
+    - name: BUILD DOCKER IMAGE WITH CACHE
       uses: docker/build-push-action@v5
       with:
         context: .
@@ -55,13 +55,13 @@ jobs:
         cache-to: type=local,dest=/tmp/.buildx-cache-new
         outputs: type=docker
 
-    - name: Move Cache
+    - name: MOVE CACHE
       if: success()
       run: |
         rm -rf /tmp/.buildx-cache
         mv /tmp/.buildx-cache-new /tmp/.buildx-cache
 
-    - name: Run All Tests & Generate Report
+    - name: RUN ALL TESTS AND GENERATE REPORT
       run: |
         docker run --platform linux/amd64 -i --rm \
           -v ${{ github.workspace }}:/src \
@@ -69,14 +69,14 @@ jobs:
           cuda-qcb:latest \
           bash -c "make clean && make all && ./obj/all_cpu_tests --gtest_output=xml:all_cpu_report.xml"
 
-    - name: Upload All CPU GTEST XML Report
+    - name: UPLOAD ALL TEST RESULTS
       uses: actions/upload-artifact@v4
       with:
         name: gtest-report
         path: tests/cpu/all_cpu_report.xml
 
-    - name: Publish All CPU GTEST XML Report
+    - name: PUBLISH ALL TEST RESULTS
       uses: EnricoMi/publish-unit-test-result-action@v2
       with:
         files: tests/cpu/all_cpu_report.xml
-        check_name: "All CPU Test Results (CPU)"
+        check_name: "CPU TEST RESULTS"

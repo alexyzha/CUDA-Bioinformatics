@@ -244,3 +244,197 @@ TEST(XAM_UTIL, CIGAR_ALL_ALLOWED) {
     std::string cigar = make_cigar(align);
     EXPECT_EQ(cigar, exp) << RED << "CIGAR SHOULD = 1X2M3I1X2D2I3M1I2M2D, NOT [" << cigar << "]" << RESET << std::endl;
 }
+
+TEST(XAM_UTIL, MAP_READS_TO_REF_MATCH_SINGLE) {
+    std::string ref = "AAAA";
+    std::string ref_id = "REFID";
+    std::string read = "AAAA";
+    std::vector<fq_read*> fqreads = {};
+    fqreads.push_back(new fq_read("READID", 4, read, "!!!!", ""));
+    std::vector<sam_read*> samreads = map_reads_to_ref(ref, ref_id, fqreads, 4);
+    // Validate samreads
+    auto [tags, qname, rname, cigar, rnext, seq, qual, flags, pos, posnext, tlen, mapq] = (*samreads[0]);
+    EXPECT_TRUE(tags.empty()) << RED << "NO TAGS SHOULD BE GENERATED" << RESET << std::endl;
+    EXPECT_EQ(qname, "READID") << RED << "DIFFERENT QNAME THAN EXP" << RESET << std::endl;
+    EXPECT_EQ(rname, ref_id) << RED << "DIFFERENT RNAME THAN EXP" << RESET << std::endl;
+    EXPECT_EQ(cigar, "4M") << RED << "DIFFERENT CIGAR THAN EXP" << RESET << std::endl;
+    EXPECT_EQ(rnext, "*") << RED << "DIFFERENT RNEXT THAN EXP" << RESET << std::endl;
+    EXPECT_EQ(seq, read) << RED << "DIFFERENT SEQ THAN EXP" << RESET << std::endl;
+    EXPECT_EQ(qual, "!!!!") << RED << "DIFFERENT QUAL THAN EXP" << RESET << std::endl;
+    EXPECT_EQ(flags, 0) << RED << "DIFFERENT FLAGS THAN EXP" << RESET << std::endl;
+    EXPECT_EQ(pos, 0) << RED << "DIFFERENT POS THAN EXP" << RESET << std::endl;
+    EXPECT_EQ(posnext, 0) << RED << "DIFFERENT POSNEXT THAN EXP" << RESET << std::endl;
+    EXPECT_EQ(tlen, 0) << RED << "DIFFERENT TLEN THAN EXP" << RESET << std::endl;
+    EXPECT_EQ(mapq, static_cast<char>(255)) << RED << "DIFFERENT MAPQ THAN EXP" << RESET << std::endl;
+}
+
+TEST(XAM_UTIL, MAP_READS_TO_REF_MIDDLE_SINGLE) {
+    std::string ref = "AAGCTAAA";
+    std::string ref_id = "REFID";
+    std::string read = "GCT";
+    std::vector<fq_read*> fqreads = {};
+    fqreads.push_back(new fq_read("READID", 3, read, "!!!", ""));
+    std::vector<sam_read*> samreads = map_reads_to_ref(ref, ref_id, fqreads, 3);
+    // Validate samreads
+    auto [tags, qname, rname, cigar, rnext, seq, qual, flags, pos, posnext, tlen, mapq] = (*samreads[0]);
+    EXPECT_TRUE(tags.empty()) << RED << "NO TAGS SHOULD BE GENERATED" << RESET << std::endl;
+    EXPECT_EQ(qname, "READID") << RED << "DIFFERENT QNAME THAN EXP" << RESET << std::endl;
+    EXPECT_EQ(rname, ref_id) << RED << "DIFFERENT RNAME THAN EXP" << RESET << std::endl;
+    EXPECT_EQ(cigar, "3M") << RED << "DIFFERENT CIGAR THAN EXP" << RESET << std::endl;
+    EXPECT_EQ(rnext, "*") << RED << "DIFFERENT RNEXT THAN EXP" << RESET << std::endl;
+    EXPECT_EQ(seq, read) << RED << "DIFFERENT SEQ THAN EXP" << RESET << std::endl;
+    EXPECT_EQ(qual, "!!!") << RED << "DIFFERENT QUAL THAN EXP" << RESET << std::endl;
+    EXPECT_EQ(flags, 0) << RED << "DIFFERENT FLAGS THAN EXP" << RESET << std::endl;
+    EXPECT_EQ(pos, 2) << RED << "DIFFERENT POS THAN EXP" << RESET << std::endl;
+    EXPECT_EQ(posnext, 0) << RED << "DIFFERENT POSNEXT THAN EXP" << RESET << std::endl;
+    EXPECT_EQ(tlen, 0) << RED << "DIFFERENT TLEN THAN EXP" << RESET << std::endl;
+    EXPECT_EQ(mapq, static_cast<char>(255)) << RED << "DIFFERENT MAPQ THAN EXP" << RESET << std::endl;
+}
+
+TEST(XAM_UTIL, MAP_READS_TO_REF_MIDDLE_MISMATCH_SINGLE) {
+    std::string ref = "AAGCTAAA";
+    std::string ref_id = "REFID";
+    std::string read = "GAT";
+    std::vector<fq_read*> fqreads = {};
+    fqreads.push_back(new fq_read("READID", 3, read, "!!!", ""));
+    std::vector<sam_read*> samreads = map_reads_to_ref(ref, ref_id, fqreads, 3);
+    // Validate samreads
+    auto [tags, qname, rname, cigar, rnext, seq, qual, flags, pos, posnext, tlen, mapq] = (*samreads[0]);
+    EXPECT_TRUE(tags.empty()) << RED << "NO TAGS SHOULD BE GENERATED" << RESET << std::endl;
+    EXPECT_EQ(qname, "READID") << RED << "DIFFERENT QNAME THAN EXP" << RESET << std::endl;
+    EXPECT_EQ(rname, ref_id) << RED << "DIFFERENT RNAME THAN EXP" << RESET << std::endl;
+    EXPECT_EQ(cigar, "*") << RED << "DIFFERENT CIGAR THAN EXP" << RESET << std::endl;
+    EXPECT_EQ(rnext, "*") << RED << "DIFFERENT RNEXT THAN EXP" << RESET << std::endl;
+    EXPECT_EQ(seq, read) << RED << "DIFFERENT SEQ THAN EXP" << RESET << std::endl;
+    EXPECT_EQ(qual, "!!!") << RED << "DIFFERENT QUAL THAN EXP" << RESET << std::endl;
+    EXPECT_EQ(flags, 0x4) << RED << "DIFFERENT FLAGS THAN EXP" << RESET << std::endl;
+    EXPECT_EQ(pos, 0) << RED << "DIFFERENT POS THAN EXP" << RESET << std::endl;
+    EXPECT_EQ(posnext, 0) << RED << "DIFFERENT POSNEXT THAN EXP" << RESET << std::endl;
+    EXPECT_EQ(tlen, 0) << RED << "DIFFERENT TLEN THAN EXP" << RESET << std::endl;
+    EXPECT_EQ(mapq, static_cast<char>(255)) << RED << "DIFFERENT MAPQ THAN EXP" << RESET << std::endl;
+}
+
+TEST(XAM_UTIL, MAP_READS_TO_REF_MIDDLE_MISMATCH_SINGLE_K_ALLOW) {
+    std::string ref = "AAGCTAAA";
+    std::string ref_id = "REFID";
+    std::string read = "GCTCA";
+    std::vector<fq_read*> fqreads = {};
+    fqreads.push_back(new fq_read("READID", 5, read, "!!!!!", ""));
+    std::vector<sam_read*> samreads = map_reads_to_ref(ref, ref_id, fqreads, 3);
+    // Validate samreads
+    auto [tags, qname, rname, cigar, rnext, seq, qual, flags, pos, posnext, tlen, mapq] = (*samreads[0]);
+    EXPECT_TRUE(tags.empty()) << RED << "NO TAGS SHOULD BE GENERATED" << RESET << std::endl;
+    EXPECT_EQ(qname, "READID") << RED << "DIFFERENT QNAME THAN EXP" << RESET << std::endl;
+    EXPECT_EQ(rname, ref_id) << RED << "DIFFERENT RNAME THAN EXP" << RESET << std::endl;
+    EXPECT_EQ(cigar, "3M1X1M") << RED << "DIFFERENT CIGAR THAN EXP" << RESET << std::endl;
+    EXPECT_EQ(rnext, "*") << RED << "DIFFERENT RNEXT THAN EXP" << RESET << std::endl;
+    EXPECT_EQ(seq, read) << RED << "DIFFERENT SEQ THAN EXP" << RESET << std::endl;
+    EXPECT_EQ(qual, "!!!!!") << RED << "DIFFERENT QUAL THAN EXP" << RESET << std::endl;
+    EXPECT_EQ(flags, 0) << RED << "DIFFERENT FLAGS THAN EXP" << RESET << std::endl;
+    EXPECT_EQ(pos, 2) << RED << "DIFFERENT POS THAN EXP" << RESET << std::endl;
+    EXPECT_EQ(posnext, 0) << RED << "DIFFERENT POSNEXT THAN EXP" << RESET << std::endl;
+    EXPECT_EQ(tlen, 0) << RED << "DIFFERENT TLEN THAN EXP" << RESET << std::endl;
+    EXPECT_EQ(mapq, static_cast<char>(255)) << RED << "DIFFERENT MAPQ THAN EXP" << RESET << std::endl;
+}
+
+TEST(XAM_UTIL, MAP_READS_TO_REF_MIDDLE_GAP_SINGLE_K_ALLOW) {
+    std::string ref = "AAGCTACCC";
+    std::string ref_id = "REFID";
+    std::string read = "GCTCCC";
+    std::vector<fq_read*> fqreads = {};
+    fqreads.push_back(new fq_read("READID", 6, read, "!!!!!!", ""));
+    std::vector<sam_read*> samreads = map_reads_to_ref(ref, ref_id, fqreads, 3);
+    // Validate samreads
+    auto [tags, qname, rname, cigar, rnext, seq, qual, flags, pos, posnext, tlen, mapq] = (*samreads[0]);
+    EXPECT_TRUE(tags.empty()) << RED << "NO TAGS SHOULD BE GENERATED" << RESET << std::endl;
+    EXPECT_EQ(qname, "READID") << RED << "DIFFERENT QNAME THAN EXP" << RESET << std::endl;
+    EXPECT_EQ(rname, ref_id) << RED << "DIFFERENT RNAME THAN EXP" << RESET << std::endl;
+    EXPECT_EQ(cigar, "3M1D3M") << RED << "DIFFERENT CIGAR THAN EXP" << RESET << std::endl;
+    EXPECT_EQ(rnext, "*") << RED << "DIFFERENT RNEXT THAN EXP" << RESET << std::endl;
+    EXPECT_EQ(seq, read) << RED << "DIFFERENT SEQ THAN EXP" << RESET << std::endl;
+    EXPECT_EQ(qual, "!!!!!!") << RED << "DIFFERENT QUAL THAN EXP" << RESET << std::endl;
+    EXPECT_EQ(flags, 0) << RED << "DIFFERENT FLAGS THAN EXP" << RESET << std::endl;
+    EXPECT_EQ(pos, 2) << RED << "DIFFERENT POS THAN EXP" << RESET << std::endl;
+    EXPECT_EQ(posnext, 0) << RED << "DIFFERENT POSNEXT THAN EXP" << RESET << std::endl;
+    EXPECT_EQ(tlen, 0) << RED << "DIFFERENT TLEN THAN EXP" << RESET << std::endl;
+    EXPECT_EQ(mapq, static_cast<char>(255)) << RED << "DIFFERENT MAPQ THAN EXP" << RESET << std::endl;
+}
+
+TEST(XAM_UTIL, MAP_READS_TO_REF_MATCH_MULTI) {
+    std::string ref = "CCGTACACTG";
+    std::string ref_id = "REFID";
+    std::vector<std::string> reads = {"GTA", "ACA", "CTG"};
+    std::string exp_cigar = "3M";
+    std::vector<int> exp_pos = {2, 4, 7};
+    std::vector<fq_read*> fqreads = {};
+    for(int i = 0; i < 3; ++i) {
+        fqreads.push_back(new fq_read("READID" + std::to_string(i), 3, reads[i], "!!!", ""));
+    }
+    std::vector<sam_read*> samreads = map_reads_to_ref(ref, ref_id, fqreads, 3);
+    // Validate samreads
+    for(int i = 0; i < 3; ++i) {
+        auto [tags, qname, rname, cigar, rnext, seq, qual, flags, pos, posnext, tlen, mapq] = (*samreads[i]);
+        EXPECT_TRUE(tags.empty()) << RED << "NO TAGS SHOULD BE GENERATED" << RESET << std::endl;
+        EXPECT_EQ(qname, "READID" + std::to_string(i)) << RED << "DIFFERENT QNAME THAN EXP" << RESET << std::endl;
+        EXPECT_EQ(rname, ref_id) << RED << "DIFFERENT RNAME THAN EXP" << RESET << std::endl;
+        EXPECT_EQ(cigar, exp_cigar) << RED << "DIFFERENT CIGAR THAN EXP" << RESET << std::endl;
+        EXPECT_EQ(rnext, "*") << RED << "DIFFERENT RNEXT THAN EXP" << RESET << std::endl;
+        EXPECT_EQ(seq, reads[i]) << RED << "DIFFERENT SEQ THAN EXP" << RESET << std::endl;
+        EXPECT_EQ(qual, "!!!") << RED << "DIFFERENT QUAL THAN EXP" << RESET << std::endl;
+        EXPECT_EQ(flags, 0) << RED << "DIFFERENT FLAGS THAN EXP" << RESET << std::endl;
+        EXPECT_EQ(pos, exp_pos[i]) << RED << "DIFFERENT POS THAN EXP" << RESET << std::endl;
+        EXPECT_EQ(posnext, 0) << RED << "DIFFERENT POSNEXT THAN EXP" << RESET << std::endl;
+        EXPECT_EQ(tlen, 0) << RED << "DIFFERENT TLEN THAN EXP" << RESET << std::endl;
+        EXPECT_EQ(mapq, static_cast<char>(255)) << RED << "DIFFERENT MAPQ THAN EXP" << RESET << std::endl;
+    }
+}
+
+TEST(XAM_UTIL, SAM_TO_VCF_EMPTY) {
+    // Also technically "SAM_TO_VCF_HEADER_ONLY"
+    std::vector<sam_read*> samreads;
+    std::string ref_seq = "REFSEQ";
+    std::string line = "";
+    std::vector<std::string> exp_headers = {
+        "##fileformat=VCFv4.2",
+        "##source=cubio",
+        "##reference=REFID",
+        "##CHROM\tPOS\tID\tREF\tALT\tQUAL\tFILTER\tINFO"
+    };
+    sam_to_vcf("outfiles/sam_to_vcf_empty_out.txt", ref_seq, "REFID", samreads, 7);
+    // Validate output
+    std::ifstream file("outfiles/sam_to_vcf_empty_out.txt");
+    EXPECT_TRUE(file.is_open()) << RED << "INVALID FILE OR FILE DOESN'T EXIST" << RESET << std::endl;
+    for(int i = 0; i < 4; ++i) {
+        std::getline(file, line);
+        trim(line);
+        EXPECT_EQ(line, exp_headers[i]) << RED << "WRONG HEADER ON LINE [" << i << "]" << RESET << std::endl;
+    }
+    EXPECT_FALSE(std::getline(file, line)) << RED << "EXTRA LINES IN FILE" << RESET << std::endl;
+    file.close();
+}
+
+TEST(XAM_UTIL, SAM_TO_VCF_ALL) {
+    std::vector<sam_read*> samreads = read_sam("infiles/sam_to_vcf_all_in.txt");
+    std::string ref_seq = "ACTT";
+    std::string line = "";
+    std::vector<std::string> exp_lines = {
+        "##fileformat=VCFv4.2",
+        "##source=cubio",
+        "##reference=REFID",
+        "##CHROM\tPOS\tID\tREF\tALT\tQUAL\tFILTER\tINFO",
+        "7\t4\t.\tT\tG\t255\tPASS\tDP=1",
+        "7\t2\t.\tC\tG\t255\tPASS\tDP=1",
+        "7\t1\t.\tA\tC\t255\tPASS\tDP=1"
+    };
+    sam_to_vcf("outfiles/sam_to_vcf_all_out.txt", ref_seq, "REFID", samreads, 7);
+    // Validate output
+    std::ifstream file("outfiles/sam_to_vcf_all_out.txt");
+    EXPECT_TRUE(file.is_open()) << RED << "INVALID FILE OR FILE DOESN'T EXIST" << RESET << std::endl;
+    for(int i = 0; i < 7; ++i) {
+        std::getline(file, line);
+        trim(line);
+        EXPECT_EQ(line, exp_lines[i]) << RED << "WRONG VALUE ON LINE [" << i << "]" << RESET << std::endl;
+    }
+    EXPECT_FALSE(std::getline(file, line)) << RED << "EXTRA LINES IN FILE" << RESET << std::endl;
+    file.close();
+}
