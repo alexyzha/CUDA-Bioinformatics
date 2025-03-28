@@ -1,6 +1,6 @@
 #include "headers/fx_util.h"
 
-void fa_to_file(const std::vector<fq_read*>& reads, std::string file_path) {
+void fq_to_file(const std::vector<fq_read*>& reads, std::string file_path) {
     std::ofstream file(file_path);
     for(auto& read : reads) {
         read->to_file(file);

@@ -12,6 +12,9 @@
 #include <utility>
 #include <vector>
 
+/*
+ *  Convenience macros for printing GTEST error statements.
+ */
 #ifndef ANSI_ESC_COMMON
 #define ANSI_ESC_COMMON
 #define BLACK "\x1B[30m"
@@ -33,24 +36,64 @@
 #define RESET "\x1B[0m"
 #endif
 
+/*
+ *  Convenience macros for PHRED q-score analysis.
+ */
 #ifndef PHRED_COMMON
 #define PHRED_COMMON
 #define PHRED_BEGIN '!'
 #define PHRED_BEGIN_INT 33
 #endif
 
+/*
+ *  Splits a string into substrings by `c`.
+ *  @param s `const string&` string to be split
+ *  @param c `char` char to split `s` by
+ *  @return `vector<string>` list of substrings after splitting `s` by `c`
+ */
 std::vector<std::string> split_by(const std::string& s, char c);
 
+/*
+ *  Trims a string of whitespace from the left.
+ *  @param s `string&`
+ *  @return `void`
+ */
 void ltrim(std::string& s);
 
+/*
+ *  Trims a string of whitespace from the right.
+ *  @param s `string&`
+ *  @return `void`
+ */
 void rtrim(std::string& s);
 
+/*
+ *  Trims a string of whitespace from both sides.
+ *  @param s `string&`
+ *  @return `void`
+ */
 void trim(std::string& s);
 
+/*
+ *  Treats a string as a vector of numbers and returns its sum.
+ *  @param s `string&` string to be summed
+ *  @param offset `char` a set value to subtract from every instance of char addition, default = 33 = `PHRED_BEGIN`
+ *  @return `int`
+ */
 int sum(const std::string& s, char offset = PHRED_BEGIN);
 
+/*
+ *  Encodes nucleotides as bits.
+ *  @param base `char` ACGT... etc.
+ *  @return `char`
+ */
 char base_to_bit(char base);
 
+/*
+ *  Debugging helper function. Prints the bitwise representation of ints, chars, etc.
+ *  @param num `*`
+ *  @return `string` chainable in a GTEST error output
+ */
 template<typename C>
 std::string meow(C num) {
     std::string ret = "";
