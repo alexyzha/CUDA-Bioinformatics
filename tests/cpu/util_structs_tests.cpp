@@ -2,9 +2,14 @@
 #include "../../src/cpu/headers/util_structs.h"
 
 TEST(UTIL_S, ALIGNMENT) {
+    // Create testing variables
     std::string ref = "ABC";
     std::string read = "123";
+
+    // Function to be tested
     alignment test_align = {1, 2, 3, &ref, &read};
+    
+    // Validate function output
     EXPECT_EQ(test_align.score, 1) << RED << "WRONG ALIGNMENT SCORE" << RESET << std::endl;
     EXPECT_EQ(test_align.end_ref, 2) << RED << "WRONG END REF" << RESET << std::endl;
     EXPECT_EQ(test_align.end_read, 3) << RED << "WRONG END READ" << RESET << std::endl;
@@ -13,6 +18,7 @@ TEST(UTIL_S, ALIGNMENT) {
 }
 
 TEST(UTIL_S, UNION_FIND) {
+    // Create testing variables/expected variables
     std::vector<std::pair<int, int>> pairs = {
         {0, 1}, {2, 5}, {8, 11}, {10, 14},
         {3, 4}, {6, 7}, {9, 15}, {12, 13},
@@ -30,6 +36,8 @@ TEST(UTIL_S, UNION_FIND) {
     for(auto& [x, y] : pairs) {
         uf.join(x, y);
     }
+
+    // Validate union find results
     for(auto& [x, y] : exp_con) {
         EXPECT_TRUE(uf.con(x, y)) << RED << "EXP CON, GOT NOT CON" << RESET << std::endl;
     }

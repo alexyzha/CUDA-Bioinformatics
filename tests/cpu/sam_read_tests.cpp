@@ -2,11 +2,14 @@
 #include "../../src/cpu/headers/sam_read.h"
 
 TEST(SAM_READ, CONSTRUCTOR_NORMAL) {
+    // Create testing variables
     sam_read read = sam_read{
         std::vector<std::string>{}, 
         "A", "B", "C", "D", "E", "F", 
         7, 8, 9, 10, 'K'
     };
+
+    // Validate output
     EXPECT_TRUE(read.tags.empty()) << RED << "TAGS SOMEHOW NOT EMPTY" << std::endl;
     EXPECT_EQ(read.qname, "A") << RED << "QNAME MISMATCH" << std::endl;
     EXPECT_EQ(read.rname, "B") << RED << "RNAME MISMATCH" << std::endl;
@@ -22,11 +25,14 @@ TEST(SAM_READ, CONSTRUCTOR_NORMAL) {
 }
 
 TEST(SAM_READ, CONSTRUCTOR_AGG_EV) {
+    // Create testing variables
     sam_read read = {
         std::vector<std::string>{}, 
         "A", "B", "C", "D", "E", "F", 
         7, 8, 9, 10, 'K'
     };
+
+    // Validate output
     EXPECT_TRUE(read.tags.empty()) << RED << "TAGS SOMEHOW NOT EMPTY" << std::endl;
     EXPECT_EQ(read.qname, "A") << RED << "QNAME MISMATCH" << std::endl;
     EXPECT_EQ(read.rname, "B") << RED << "RNAME MISMATCH" << std::endl;
@@ -42,12 +48,15 @@ TEST(SAM_READ, CONSTRUCTOR_AGG_EV) {
 }
 
 TEST(SAM_READ, CONSTRUCTOR_AGG_FV) {
+    // Create testing variables
     std::vector<std::string> exp_tags = {"L", "M", "N"};
     sam_read read = {
         std::vector<std::string>{"L", "M", "N"}, 
         "A", "B", "C", "D", "E", "F", 
         7, 8, 9, 10, 'K'
     };
+
+    // Validate output
     EXPECT_EQ(read.tags.size(), 3) << RED << "TAGS HAS INCORRECT NUMBER OF ITEMS" << std::endl;
     for(int i = 0; i < 3; ++i) {
         EXPECT_EQ(read.tags[i], exp_tags[i]) << RED << "TAGS ITEM MISMATCH AT [" << i << "]" << std::endl;
@@ -66,12 +75,15 @@ TEST(SAM_READ, CONSTRUCTOR_AGG_FV) {
 }
 
 TEST(SAM_READ, SB_ACCESS) {
+    // Create testing variables
     std::vector<std::string> exp_tags = {"L", "M", "N"};
     sam_read read = {
         std::vector<std::string>{"L", "M", "N"}, 
         "A", "B", "C", "D", "E", "F", 
         7, 8, 9, 10, 'K'
     };
+
+    // Validate output
     auto [tags, qname, rname, cigar, rnext, seq, qual, flags, pos, posnext, tlen, mapq] = read;
     EXPECT_EQ(tags.size(), 3) << RED << "SB TAGS HAS INCORRECT NUMBER OF ITEMS" << std::endl;
     EXPECT_EQ(read.tags.size(), 3) << RED << "TAGS HAS INCORRECT NUMBER OF ITEMS" << std::endl;

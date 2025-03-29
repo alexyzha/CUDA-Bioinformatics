@@ -2,17 +2,27 @@
 #include "../../src/cpu/headers/xam_parser.h"
 
 TEST(SAM_PARSER, EMPTY) {
+    // Create testing variables
     std::string file = "infiles/empty.txt";
+
+    // Function to be tested
     std::vector<sam_read*> reads = read_sam(file);
+
+    // Validate function output
     std::unordered_map<std::string, std::vector<std::string>> headers = read_sam_headers(file);
     EXPECT_TRUE(reads.empty()) << RED << "READ FROM EMPTY FILE" << RESET << std::endl;
     EXPECT_TRUE(headers.empty()) << RED << "HEADER FROM EPMTY FILE" << RESET << std::endl;
 }
 
 TEST(SAM_PARSER, READS_ONLY_NO_TAGS) {
+    // Create testing variables
     std::string file = "infiles/sam_parser_read_no_tags_in.txt";
+    
+    // Function to be tested
     std::vector<sam_read*> reads = read_sam(file);
     std::unordered_map<std::string, std::vector<std::string>> headers = read_sam_headers(file);
+    
+    // Validate function output
     EXPECT_TRUE(headers.empty()) << RED << "HEADER FROM FILE WITH NO HEADER" << std::endl;
     EXPECT_EQ(reads.size(), 1) << RED << "GOT != 1 READ FROM FILE WITH SINGULAR READ" << std::endl;
     auto [tags, qname, rname, cigar, rnext, seq, qual, flags, pos, posnext, tlen, mapq] = (*reads[0]);
@@ -31,9 +41,14 @@ TEST(SAM_PARSER, READS_ONLY_NO_TAGS) {
 }
 
 TEST(SAM_PARSER, READS_ONLY_YES_TAGS) {
+    // Create testing variables
     std::string file = "infiles/sam_parser_read_yes_tags_in.txt";
+    
+    // Function to be tested
     std::vector<sam_read*> reads = read_sam(file);
     std::unordered_map<std::string, std::vector<std::string>> headers = read_sam_headers(file);
+    
+    // Validate function output
     EXPECT_TRUE(headers.empty()) << RED << "HEADER FROM FILE WITH NO HEADER" << std::endl;
     EXPECT_EQ(reads.size(), 1) << RED << "GOT != 1 READ FROM FILE WITH SINGULAR READ" << std::endl;
     auto [tags, qname, rname, cigar, rnext, seq, qual, flags, pos, posnext, tlen, mapq] = (*reads[0]);
@@ -52,7 +67,7 @@ TEST(SAM_PARSER, READS_ONLY_YES_TAGS) {
 }
 
 TEST(SAM_PARSER, MULTI_READS) {
-    // EXP
+    // Create testing variables/expected variables
     std::vector<std::vector<std::string>> exp_tags = {
         {"OOPY"}, {"TAG1", "TAG2", "TAG3"}, {"BRUH", "BRUH_AGAIN"}
     };
@@ -67,10 +82,13 @@ TEST(SAM_PARSER, MULTI_READS) {
     std::vector<size_t> exp_tlen = {12034, 102398, 120};
     std::vector<std::string> exp_seq = {"LKJAHG", "UPASDGBH", "GACTCGA"};
     std::vector<std::string> exp_qual = {"????&1234", "!09123", "&@*1010"};
-    // Test
+    
+    // Function to be tested
     std::string file = "infiles/sam_parser_multi_read_in.txt";
     std::vector<sam_read*> reads = read_sam(file);
     std::unordered_map<std::string, std::vector<std::string>> headers = read_sam_headers(file);
+    
+    // Validate function output
     EXPECT_TRUE(headers.empty()) << RED << "HEADER FROM FILE WITH NO HEADER" << std::endl;
     EXPECT_EQ(reads.size(), 3) << RED << "GOT != 3 READ FROM FILE WITH 3 READS" << std::endl;
     for(int i = 0; i < 3; ++i) {
@@ -91,16 +109,19 @@ TEST(SAM_PARSER, MULTI_READS) {
 }
 
 TEST(SAM_PARSER, HEADER_ONLY_NO_REPEAT) {
-    // EXP
+    // Create testing variables/expected variables
     std::unordered_map<std::string, std::vector<std::string>> exp_headers {
         {"AA", {"SOMETHING_IN_HEADER"}},
         {"AB", {"SOMETHING ELSE IN HEADER"}},
         {"AC", {"ANOTHER SOMETHING IN HEADER"}}
     };
-    // Test
+
+    // Function to be tested
     std::string file = "infiles/sam_parser_only_header_in.txt";
     std::vector<sam_read*> reads = read_sam(file);
     std::unordered_map<std::string, std::vector<std::string>> headers = read_sam_headers(file);
+
+    // Validate function output
     EXPECT_TRUE(reads.empty()) << RED << "READ FROM FILE WITH ONLY HEADERS/NO READS" << RESET << std::endl;
     EXPECT_EQ(headers.size(), 3) << RED << "GOT != 3 HEADER CATEGORIES FROM FILE WITH 3 CATS" << RESET << std::endl;
     for(auto& [key, vec] : headers) {
@@ -111,16 +132,19 @@ TEST(SAM_PARSER, HEADER_ONLY_NO_REPEAT) {
 }
 
 TEST(SAM_PARSER, HEADER_ONLY_YES_REPEAT) {
-    // EXP
+    // Create testing variables/expected variables
     std::unordered_map<std::string, std::vector<std::string>> exp_headers {
         {"AA", {"SOMETHING_IN_HEADER", "SPOOKY SAME HEADER"}},
         {"AB", {"BUT THIS IS DIFFERENT D:", "ANOTHER AB!"}},
         {"AC", {"LONELY AC D:"}}
     };
-    // Test
+
+    // Function to be tested
     std::string file = "infiles/sam_parser_dupe_header_in.txt";
     std::vector<sam_read*> reads = read_sam(file);
     std::unordered_map<std::string, std::vector<std::string>> headers = read_sam_headers(file);
+    
+    // Validate function output
     EXPECT_TRUE(reads.empty()) << RED << "READ FROM FILE WITH ONLY HEADERS/NO READS" << RESET << std::endl;
     EXPECT_EQ(headers.size(), 3) << RED << "GOT != 3 HEADER CATEGORIES FROM FILE WITH 3 CATS" << RESET << std::endl;
     for(auto& [key, vec] : headers) {
@@ -133,7 +157,7 @@ TEST(SAM_PARSER, HEADER_ONLY_YES_REPEAT) {
 }
 
 TEST(SAM_PARSER, BOTH_READS_AND_HEADER) {
-    // EXP
+    // Create testing variables/expected variables
     std::unordered_map<std::string, std::vector<std::string>> exp_headers {
         {"CA", {"HEADER1", "HEADER3"}},
         {"TZ", {"HEADER2", "HEADER4"}},
@@ -153,7 +177,8 @@ TEST(SAM_PARSER, BOTH_READS_AND_HEADER) {
     std::vector<size_t> exp_tlen = {1000, 2000, 3000};
     std::vector<std::string> exp_seq = {"AAA", "BBB", "CCC"};
     std::vector<std::string> exp_qual = {"???", "?*!", "!!!"};
-    // Test header
+    
+    // Validate header
     std::string file = "infiles/sam_parser_all_allowed_in.txt";
     std::unordered_map<std::string, std::vector<std::string>> headers = read_sam_headers(file);
     EXPECT_EQ(headers.size(), 3) << RED << "GOT != 3 HEADER CATEGORIES FROM FILE WITH 3 CATS" << RESET << std::endl;
@@ -164,7 +189,8 @@ TEST(SAM_PARSER, BOTH_READS_AND_HEADER) {
             EXPECT_EQ(vec[i], exp_headers[key][i]) << RED << "HEADER CONTENT MISMATCH AT KEY [" << key << "][" << i << "]" << RESET << std::endl;
         }
     }
-    // Test read
+    
+    // Validate read
     std::vector<sam_read*> reads = read_sam(file);
     EXPECT_EQ(reads.size(), 3) << RED << "GOT != 3 READ FROM FILE WITH 3 READS" << std::endl;
     for(int i = 0; i < 3; ++i) {
