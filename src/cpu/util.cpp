@@ -3,8 +3,12 @@
 std::vector<std::string> split_by(const std::string& s, char c) {
     std::vector<std::string> substrings = {};
     std::string temp = "";
+
+    // Main processing loop
     for(auto& ch : s) {
         if(ch == c) {
+            
+            // Only push if there is a substring to push. That is: don't push empty strings
             if(!temp.empty()) {
                 substrings.push_back(temp);
             }
@@ -13,6 +17,8 @@ std::vector<std::string> split_by(const std::string& s, char c) {
             temp.push_back(ch);
         }
     }
+
+    // Sometimes last substring isn't pushed 
     if(!temp.empty()) {
         substrings.push_back(temp);
     }
