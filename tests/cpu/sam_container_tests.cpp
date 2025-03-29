@@ -2,19 +2,26 @@
 #include "../../src/cpu/headers/sam_container.h"
 
 TEST(SAM_CONTAINER, CONSTRUCTOR_EMPTY) {
+    // Class being tested
     sam_container cont("infiles/empty.txt");
     const auto& headers = cont.get_headers();
     const auto& reads = cont.get_reads();
+
+    // Validate class contents
     EXPECT_TRUE(headers.empty()) << RED << "HEADER FROM EMPTY FILE" << RESET << std::endl;
     EXPECT_TRUE(reads.empty()) << RED << "READ FROM EMPTY FILE" << RESET << std::endl;
 }
 
 TEST(SAM_CONTAINER, CONSTRUCTOR_READ_ONLY) {
+    // Create testing variables
     sam_container cont("infiles/sam_parser_read_yes_tags_in.txt");
     const auto& headers = cont.get_headers();
     const auto& reads = cont.get_reads();
+    
+    // Prelim validations
     EXPECT_TRUE(headers.empty()) << RED << "HEADER FROM NO HEADER FILE" << RESET << std::endl;
     EXPECT_EQ(reads.size(), 1) << RED << "EXPECTED 1 READ" << RESET << std::endl;
+    
     // Read validation
     auto [tags, qname, rname, cigar, rnext, seq, qual, flags, pos, posnext, tlen, mapq] = (*reads[0]);
     EXPECT_EQ(tags, std::vector<std::string>({"TAG1", "TAG2", "TAG3"})) << RED << "WRONG/NO TAGS CAPTURED WHEN EXP \'TAG[1:3]\'" << RESET << std::endl;
@@ -32,12 +39,16 @@ TEST(SAM_CONTAINER, CONSTRUCTOR_READ_ONLY) {
 }
 
 TEST(SAM_CONTAINER, CONSTRUCTOR_MULTI_READ) {
+    // Create testing variables
     sam_container cont("infiles/sam_parser_multi_read_in.txt");
     const auto& headers = cont.get_headers();
     const auto& reads = cont.get_reads();
+    
+    // Prelim validations
     EXPECT_TRUE(headers.empty()) << RED << "HEADER FROM NO HEADER FILE" << RESET << std::endl;
     EXPECT_EQ(reads.size(), 3) << RED << "EXPECTED 3 READS" << RESET << std::endl;
-    // Read validation
+    
+    // Read expected
     std::vector<std::vector<std::string>> exp_tags = {
         {"OOPY"}, {"TAG1", "TAG2", "TAG3"}, {"BRUH", "BRUH_AGAIN"}
     };
@@ -52,7 +63,8 @@ TEST(SAM_CONTAINER, CONSTRUCTOR_MULTI_READ) {
     std::vector<size_t> exp_tlen = {12034, 102398, 120};
     std::vector<std::string> exp_seq = {"LKJAHG", "UPASDGBH", "GACTCGA"};
     std::vector<std::string> exp_qual = {"????&1234", "!09123", "&@*1010"};
-    // Test
+    
+    // Read validation
     for(int i = 0; i < 3; ++i) {
         auto [tags, qname, rname, cigar, rnext, seq, qual, flags, pos, posnext, tlen, mapq] = (*reads[i]);
         EXPECT_EQ(tags, exp_tags[i]) << RED << "WRONG/NO TAGS CAPTURED FOR READ [" << i << "]" << RESET << std::endl;
@@ -71,18 +83,23 @@ TEST(SAM_CONTAINER, CONSTRUCTOR_MULTI_READ) {
 }
 
 TEST(SAM_CONTAINER, HEADER_ONLY_NO_DUPES) {
+    // Create testing variables
     sam_container cont("infiles/sam_parser_only_header_in.txt");
     const auto& headers = cont.get_headers();
     const auto& reads = cont.get_reads();
+    
+    // Prelim validations
     EXPECT_TRUE(reads.empty()) << RED << "GOT READS FROM FILE WITH NO READS" << RESET << std::endl;
     EXPECT_EQ(headers.size(), 3) << RED << "EXP 3 HEADERS" << RESET << std::endl;
-    // Header validation
+    
+    // Header expected
     std::unordered_map<std::string, std::vector<std::string>> exp_headers {
         {"AA", {"SOMETHING_IN_HEADER"}},
         {"AB", {"SOMETHING ELSE IN HEADER"}},
         {"AC", {"ANOTHER SOMETHING IN HEADER"}}
     };
-    // Test
+    
+    // Header validation
     for(auto& [key, vec] : headers) {
         EXPECT_NE(exp_headers.find(key), exp_headers.end()) << RED << "UNEXPECTED HEADER DELIM PARSED" << RESET << std::endl;
         EXPECT_EQ(vec.size(), exp_headers[key].size()) << RED << "KEY [" << key << "] HAS != 1 HEADER ASSOC, EXP 1" << RESET << std::endl; 
@@ -91,18 +108,23 @@ TEST(SAM_CONTAINER, HEADER_ONLY_NO_DUPES) {
 }
 
 TEST(SAM_CONTAINER, HEADER_ONLY_WITH_DUPES) {
+    // Create testing variables
     sam_container cont("infiles/sam_parser_dupe_header_in.txt");
     const auto& headers = cont.get_headers();
     const auto& reads = cont.get_reads();
+    
+    // Prelim validations
     EXPECT_TRUE(reads.empty()) << RED << "GOT READS FROM FILE WITH NO READS" << RESET << std::endl;
     EXPECT_EQ(headers.size(), 3) << RED << "EXP 3 UNIQUE HEADERS" << RESET << std::endl;
-    // Header validation
+    
+    // Header expected
     std::unordered_map<std::string, std::vector<std::string>> exp_headers {
         {"AA", {"SOMETHING_IN_HEADER", "SPOOKY SAME HEADER"}},
         {"AB", {"BUT THIS IS DIFFERENT D:", "ANOTHER AB!"}},
         {"AC", {"LONELY AC D:"}}
     };
-    // Test
+
+    // Header validation
     for(auto& [key, vec] : headers) {
         EXPECT_NE(exp_headers.find(key), exp_headers.end()) << RED << "UNEXPECTED HEADER DELIM PARSED" << RESET << std::endl;
         EXPECT_EQ(vec.size(), exp_headers[key].size()) << RED << "KEY [" << key << "] HAS MISMATCH HEADER ASSOC" << RESET << std::endl; 
@@ -113,17 +135,23 @@ TEST(SAM_CONTAINER, HEADER_ONLY_WITH_DUPES) {
 }
 
 TEST(SAM_CONTAINER, BOTH_READS_AND_HEADER) {
+    // Create testing variables
     sam_container cont("infiles/sam_parser_all_allowed_in.txt");
     const auto& headers = cont.get_headers();
     const auto& reads = cont.get_reads();
+    
+    // Prelim validations
     EXPECT_EQ(reads.size(), 3) << RED << "EXPECTED 3 READS" << RESET << std::endl;
     EXPECT_EQ(headers.size(), 3) << RED << "EXP 3 UNIQUE HEADERS" << RESET << std::endl;
-    // EXP
+    
+    // Headers expected
     std::unordered_map<std::string, std::vector<std::string>> exp_headers {
         {"CA", {"HEADER1", "HEADER3"}},
         {"TZ", {"HEADER2", "HEADER4"}},
         {"FG", {"HEADER5"}}
     };
+
+    // Reads expected
     std::vector<std::vector<std::string>> exp_tags = {
         {"TAG1"}, {"TAG2", "TAG2A"}, {"TAG3", "TAG3A", "TAG3B"}
     };
@@ -138,6 +166,7 @@ TEST(SAM_CONTAINER, BOTH_READS_AND_HEADER) {
     std::vector<size_t> exp_tlen = {1000, 2000, 3000};
     std::vector<std::string> exp_seq = {"AAA", "BBB", "CCC"};
     std::vector<std::string> exp_qual = {"???", "?*!", "!!!"};
+    
     // Header validation
     for(auto& [key, vec] : headers) {
         EXPECT_NE(exp_headers.find(key), exp_headers.end()) << RED << "UNEXPECTED HEADER DELIM PARSED" << RESET << std::endl;
@@ -165,15 +194,24 @@ TEST(SAM_CONTAINER, BOTH_READS_AND_HEADER) {
 }
 
 TEST(SAM_CONTAINER, SORTING) {
+    // Create testing variables
     sam_container cont("infiles/sam_parser_multi_read_in.txt");
+    
+    // Function being tested
     cont.sort([&](sam_read* a, sam_read* b) {
         return a->posnext > b->posnext;
     });
     const auto& headers = cont.get_headers();
     const auto& reads = cont.get_reads();
+    
+    // Prelim validations
     EXPECT_TRUE(headers.empty()) << RED << "GOT HEADERS FROM FILE WITH NO HEADERS" << RESET << std::endl;
     EXPECT_EQ(reads.size(), 3) << RED << "GOT != 3 READS FROM A FILE WITH 3 READS" << RESET << std::endl;
+    
+    // Expected ID orders
     std::vector<std::string> exp_id = {"ID2", "ID1", "ID3"};
+    
+    // Validate function results
     for(int i = 0; i < 3; ++i) {
         EXPECT_EQ(reads[i]->qname, exp_id[i]) << RED << "READS NOT IN SORTED ORDER" << RESET << std::endl;
     }
