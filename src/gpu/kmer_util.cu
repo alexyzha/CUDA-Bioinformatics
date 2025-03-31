@@ -1,4 +1,4 @@
-#include "headers/cu_kmers.h"
+#include "headers/kmers.cuh"
 
 __device__ void cu_count_kmers(kh_pair<uint64_t>* MAP, char* ALL_SEQ, size_t* OFFSETS, size_t K, size_t LEN, size_t MAP_LEN) {
     // OOB check for block/thread & K OOB check

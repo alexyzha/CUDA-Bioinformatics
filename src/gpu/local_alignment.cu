@@ -1,4 +1,4 @@
-#include "headers/cu_local_alignment.h"
+#include "headers/local_alignment.cuh"
 
 __device__ void cu_local_alignment(char* ALL_SEQ, char* CIGAR_BUF, int* CACHE, size_t* OFFSETS, size_t LEN, cu_alignment* RET) {
     // OOB check for block/thread

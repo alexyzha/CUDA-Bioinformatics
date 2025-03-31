@@ -1,4 +1,4 @@
-#include "cu_util_structs.h"
+#include "util_structs.cuh"
 
 #ifndef CU_LOCAL_ALIGNMENT_MACROS
 #define CU_LOCAL_ALIGNMENT_MACROS

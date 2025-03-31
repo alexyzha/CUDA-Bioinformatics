@@ -5,6 +5,14 @@
 #include <chrono>
 #include <stdexcept>
 #include <sstream>
+#include <unordered_map>
+#include <utility>
+#include <vector>
+#include "../../src/gpu/headers/fq_filter.cuh"
+#include "../../src/gpu/headers/kmer_util.cuh"
+#include "../../src/gpu/headers/local_alignment.cuh"
+#include "../../src/gpu/headers/util_structs.cuh"
+#include "../../src/gpu/headers/util.cuh"
 
 #ifndef ANSI_ESC_COMMON
 #define ANSI_ESC_COMMON
@@ -104,5 +112,14 @@ inline void EXPECT_TRUE(bool ACT) {
 inline void EXPECT_FALSE(bool ACT) {
     if(ACT) {
         throw std::runtime_error("EXPECT_FALSE failed\nExpected: false\nActual: true");
+    }
+}
+
+template<typename T, typename U, typename V>
+void EXPECT_NEAR(const T& EXP, const U& ACT, v THRESH) {
+    if(std::abs(EXP - ACT) > THRESH) {
+        std::ostringstream oss;
+        oss << "EXPECT_NEAR failed\nExpected difference <= " << THRESH << "\nActual difference: " << std::abs(EXP - ACT);
+        throw std::runtime_error(oss.str());
     }
 }

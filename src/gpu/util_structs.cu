@@ -1,4 +1,4 @@
-#include "headers/cu_util_structs.h"
+#include "headers/util_structs.cuh"
 
 #ifdef C_CU_UF
 

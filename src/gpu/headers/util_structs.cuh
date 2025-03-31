@@ -1,4 +1,4 @@
-#include "cu_util.h"
+#include "util.cuh"
 
 #ifndef C_CU_ALIGNMENT
 #define C_CU_ALIGNMENT

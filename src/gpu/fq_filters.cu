@@ -1,4 +1,4 @@
-#include "headers/cu_fq_filters.h"
+#include "headers/fq_filters.cuh"
 
 __device__ void cu_filter_reads(char* ALL_SEQ, uint32_t* OFFSETS, size_t LEN, char FILTER_MODE, char THRESH, uint64_t* FILTER_MASK, double PROPORTION) {
     // Block/thread OOB checks

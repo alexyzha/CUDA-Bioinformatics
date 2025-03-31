@@ -1,4 +1,4 @@
-#include "headers/cu_util.h"
+#include "headers/util.cuh"
 
 __device__ int __max(int a, int b) {
     return a > b ? a : b;
