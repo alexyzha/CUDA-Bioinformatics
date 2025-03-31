@@ -26,7 +26,7 @@ __device__ void cu_count_kmers(kh_pair<uint64_t>* MAP, char* ALL_SEQ, size_t* OF
         // From index SEQ_BEGIN to SEQ_BEGIN + K - 1, hash is not yet a full kmer
         if(i >= K - 1) {
             // Get hash
-            uint64_t index = kh_hash(hash);
+            uint64_t index = kh_hash(hash) % MAP_LEN;
 
             // Linear probing
             for(int i = 0; i < MAP_LEN; ++i) {
@@ -74,7 +74,7 @@ __device__ void cu_index_kmers(kh_pair<uint32_t[MAP_MAX_INDICES + 1]>* MAP, char
         // From index SEQ_BEGIN to SEQ_BEGIN + K - 1, hash is not yet a full kmer
         if(i >= K - 1) {
             // Get hash
-            uint64_t index = kh_hash(hash);
+            uint64_t index = kh_hash(hash) % MAP_LEN;
 
             // Linear probing
             for(int i = 0; i < MAP_LEN; ++i) {
@@ -130,8 +130,8 @@ __device__ void cu_get_kmer_overlaps(kh_pair<uint32_t[MAP_MAX_INDICES + 1]>* MAP
     }
 }
 
-__device__ void cu_cluster_kmers(cu_union_find* UF, size_t LEN, size_t NODES, uint32_t* EDGE_LIST, uint32_t EDGE_COUNT) {
-    // OOB checks
+__device__ void cu_get_uf(cu_union_find* UF, size_t LEN, size_t NODES, uint32_t* EDGE_LIST, uint32_t EDGE_COUNT) {
+    // Block/thread OOB checks
     int INDEX = (blockIdx.x * blockDim.x + threadIdx.x) * 2;
     if(INDEX + 1 >= EDGE_COUNT) {
         return;
@@ -141,4 +141,40 @@ __device__ void cu_cluster_kmers(cu_union_find* UF, size_t LEN, size_t NODES, ui
     uint32_t src = EDGE_LIST[INDEX];
     uint32_t dest = EDGE_LIST[INDEX + 1];
     cu_uf_join(UF, src, dest);
+}
+
+__device__ void cur_get_clusters{cu_union_find* UF, kh_pair<uint32_t[MAX_CLUSTER_SIZE + 1]> * MAP, size_t LEN, size_t MAP_LEN, size_t K} {
+    // Block/thread OOB checks
+    int INDEX = blockIdx.x * blockDim.x + threadIdx.x;
+    if(INDEX >= LEN) {
+        return;
+    }
+
+    // Check root size
+    int px = cu_uf_find(UF, INDEX);
+    if(UF->h[px] < K) {
+        return;
+    }
+
+    // Add to cluster
+    uint64_t index = kh_hash((ULL)INDEX) % MAP_LEN;
+    for(int i = 0; i < MAP_LEN; ++i) {
+        int cur = (index + i) % MAP_LEN;
+        uint64_t prev = atomicCAS((ULL*)&MAP[cur].key, (ULL)EMPTY, (ULL)INDEX);
+
+        // Insert new or found a match in map
+        if(prev == EMPTY || prev == INDEX) {
+            // cluster[0] = last free index
+            uint32_t* cluster = &MAP[cur].value[0];
+            uint32_t count = atomicAdd(&cluster[0], 1);
+
+            // Prevent overflow/add index to list
+            if(count < MAX_CLUSTER_SIZE) {
+                cluster[count + 1] = INDEX;
+            } else {
+                atomicSub(&cluster[0], 1);
+            }
+            break;
+        }
+    }
 }

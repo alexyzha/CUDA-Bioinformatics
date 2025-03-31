@@ -1,6 +1,6 @@
 #include "headers/cu_local_alignment.h"
 
-__device__ void local_alignment(char* ALL_SEQ, char* CIGAR_BUF, int* CACHE, size_t* OFFSETS, size_t LEN, cu_alignment* RET) {
+__device__ void cu_local_alignment(char* ALL_SEQ, char* CIGAR_BUF, int* CACHE, size_t* OFFSETS, size_t LEN, cu_alignment* RET) {
     // OOB check for block/thread
     int SEQ_NUM = blockIdx.x * blockDim.x + threadIdx.x;
     if(SEQ_NUM >= LEN || !SEQ_NUM) {
@@ -13,7 +13,6 @@ __device__ void local_alignment(char* ALL_SEQ, char* CIGAR_BUF, int* CACHE, size
     size_t READ_BEGIN = OFFSETS[SEQ_NUM - 1] + 1;
     size_t READ_SIZE = OFFSETS[SEQ_NUM] + 1 - READ_BEGIN;
     size_t CIGAR_BEGIN = SEQ_NUM * MAX_CIGAR_LEN;
-
 
     // Find preallocated space from CACHE
     int* cache = &CACHE[(MAX_REF_LEN + 1) * (MAX_READ_LEN + 1) * SEQ_NUM];
@@ -116,7 +115,7 @@ __device__ void local_alignment(char* ALL_SEQ, char* CIGAR_BUF, int* CACHE, size
     RET[SEQ_NUM].score = MAX_SCORE;
 }
 
-__device__ void fq_local_alignment(char* REF, cu_fq_read* READS, char* CIGAR_BUF, int* CACHE, size_t* OFFSETS, size_t LEN, size_t REF_SIZE, cu_alignment* RET) {
+__device__ void cu_fq_local_alignment(char* REF, cu_fq_read* READS, char* CIGAR_BUF, int* CACHE, size_t* OFFSETS, size_t LEN, size_t REF_SIZE, cu_alignment* RET) {
     // OOB check for block/thread
     int SEQ_NUM = blockIdx.x * blockDim.x + threadIdx.x;
     if(SEQ_NUM >= LEN || !SEQ_NUM) {
@@ -126,7 +125,6 @@ __device__ void fq_local_alignment(char* REF, cu_fq_read* READS, char* CIGAR_BUF
     // Extract ref and read offsets for convenience
     size_t READ_SIZE = READS[SEQ_NUM].size;
     size_t CIGAR_BEGIN = SEQ_NUM * MAX_CIGAR_LEN;
-
 
     // Find preallocated space from CACHE
     int* cache = &CACHE[(MAX_REF_LEN + 1) * (MAX_READ_LEN + 1) * SEQ_NUM];
