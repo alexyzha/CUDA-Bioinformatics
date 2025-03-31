@@ -1,8 +1,10 @@
 #pragma once
+#include <algorithm>
 #include <iostream>
 #include <string>
 #include <chrono>
 #include <stdexcept>
+#include <sstream>
 
 #ifndef ANSI_ESC_COMMON
 #define ANSI_ESC_COMMON
@@ -72,5 +74,35 @@ TEST_RESULT* TEST(std::string TEST_SUITE, std::string TEST_NAME, T TEST_FXN) {
         auto END = std::chrono::high_resolution_clock::now();
         int TIME_TAKEN = duration_cast<milliseconds>(END - START).count();
         return new TEST_RESULT{TEST_SUITE, TEST_NAME, false, TIME_TAKEN};
+    }
+}
+
+template<typename T, typename U>
+void EXPECT_EQ(const T& EXP, const U& ACT) {
+    if(!(EXP == ACT)) {
+        std::ostringstream oss;
+        oss << "EXPECT_EQ failed\nExpected: " << EXP << "\nActual: " << ACT;
+        throw std::runtime_error(oss.str());
+    }
+}
+
+template<typename T, typename U>
+void EXPECT_NE(const T& EXP, const U& ACT) {
+    if(EXP == ACT) {
+        std::ostringstream oss;
+        oss << "EXPECT_NE failed\nExpected not equal to: " << EXP << "\nActual: " << ACT;
+        throw std::runtime_error(oss.str());
+    }
+}
+
+inline void EXPECT_TRUE(bool ACT) {
+    if(!ACT) {
+        throw std::runtime_error("EXPECT_TRUE failed\nExpected: true\nActual: false");
+    }
+}
+
+inline void EXPECT_FALSE(bool ACT) {
+    if(ACT) {
+        throw std::runtime_error("EXPECT_FALSE failed\nExpected: false\nActual: true");
     }
 }
