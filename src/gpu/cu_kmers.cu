@@ -48,7 +48,7 @@ __device__ void cu_count_kmers(kh_pair<uint64_t>* MAP, char* ALL_SEQ, size_t* OF
     }
 }
 
-__device__ void cu_index_kmers(kh_pair<uint32_t[MAP_MAX_INDEXES + 1]>* MAP, char* ALL_SEQ, size_t* OFFSETS, size_t K, size_t LEN, size_t MAP_LEN) {
+__device__ void cu_index_kmers(kh_pair<uint32_t[MAP_MAX_INDICES + 1]>* MAP, char* ALL_SEQ, size_t* OFFSETS, size_t K, size_t LEN, size_t MAP_LEN) {
     // OOB check for block/thread & K OOB check
     int SEQ_NUM = blockIdx.x * blockDim.x + threadIdx.x;
     if(SEQ_NUM >= LEN || K > K_MAX || K <= 0) {
@@ -88,7 +88,7 @@ __device__ void cu_index_kmers(kh_pair<uint32_t[MAP_MAX_INDEXES + 1]>* MAP, char
                     uint32_t count = atomicAdd(&values[0], 1);
 
                     // Prevent overflow/add index to list
-                    if(count < MAP_MAX_INDEXES) {
+                    if(count < MAP_MAX_INDICES) {
                         values[count + 1] = SEQ_NUM;
                     } else {
                         atomicSub(&values[0], 1);
@@ -98,4 +98,47 @@ __device__ void cu_index_kmers(kh_pair<uint32_t[MAP_MAX_INDEXES + 1]>* MAP, char
             }
         }
     }
+}
+
+__device__ void cu_get_kmer_overlaps(kh_pair<uint32_t[MAP_MAX_INDICES + 1]>* MAP, size_t MAP_LEN, uint32_t* EDGE_LIST, uint32_t* EDGE_COUNT, uint32_t MAX_EDGES) {
+    // OOB check for block/thread
+    int SEQ_NUM = blockIdx.x * blockDim.x + threadIdx.x;
+    if(SEQ_NUM >= MAP_LEN) {
+        return;
+    }
+
+    // Get array of matching indices
+    uint32_t* matches = MAP[SEQ_NUM].value;
+    uint32_t count = matches[0];
+
+    // Iterate through all pairs
+    for(int i = 1; i <= count; ++i) {
+        for(int j = i + 1; j <= count; ++j) {
+            uint32_t src = matches[i];
+            uint32_t dest = matches[j];
+
+            // Add edges to list, watch for end of array
+            int index = atomicAdd(EDGE_COUNT, 2);
+            if(index + 1 >= MAX_EDGES) {
+                return;
+            }
+
+            // Append pair to end
+            EDGE_LIST[index] = src;
+            EDGE_LIST[index + 1] = dest;
+        }
+    }
+}
+
+__device__ void cu_cluster_kmers(cu_union_find* UF, size_t LEN, size_t NODES, uint32_t* EDGE_LIST, uint32_t EDGE_COUNT) {
+    // OOB checks
+    int INDEX = (blockIdx.x * blockDim.x + threadIdx.x) * 2;
+    if(INDEX + 1 >= EDGE_COUNT) {
+        return;
+    }
+
+    // UF join
+    uint32_t src = EDGE_LIST[INDEX];
+    uint32_t dest = EDGE_LIST[INDEX + 1];
+    cu_uf_join(UF, src, dest);
 }
