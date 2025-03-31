@@ -1,3 +1,3 @@
 # CUDA-Bioinformatics
 
-Currently working on: `cpu code comments` `gpu code` `documentation`
+Currently working on: `__device__ code tests` `__global__/__host__ wrappers` `documentation`
