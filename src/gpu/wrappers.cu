@@ -53,8 +53,6 @@ std::vector<fq_read*> cu_filter_fq(const std::vector<fq_read*>& READS, char FILT
             PROPORTION
         );
     }
-    
-    // Sync
     CUDA_CHECK(cudaDeviceSynchronize());
 
     // Copy mem back
@@ -159,8 +157,6 @@ std::unordered_map<uint64_t, uint64_t> cu_count_kmers(const std::vector<fq_read*
         READ_LEN, 
         MAP_SIZE
     );
-
-    // Sync
     CUDA_CHECK(cudaDeviceSynchronize());
 
     // Copy mem back
@@ -224,8 +220,6 @@ std::unordered_map<uint64_t, std::unordered_set<int>> cu_index_kmers(const std::
         READ_LEN,
         MAP_SIZE
     );
-
-    // Sync
     CUDA_CHECK(cudaDeviceSynchronize());
 
     // Copy mem back
@@ -305,8 +299,6 @@ std::vector<std::unordered_set<int>*> cu_cluster_by_kmer(const std::vector<fq_re
         READ_LEN,
         MAP_SIZE
     );
-
-    // Sync
     CUDA_CHECK(cudaDeviceSynchronize());
 
     // Device variables for kmer overlaps
@@ -329,8 +321,6 @@ std::vector<std::unordered_set<int>*> cu_cluster_by_kmer(const std::vector<fq_re
         d_edgecount_ptr,
         MAX_EDGES
     );
-
-    // Sync
     CUDA_CHECK(cudaDeviceSynchronize());
 
     // Device/host variables for union find
@@ -346,8 +336,6 @@ std::vector<std::unordered_set<int>*> cu_cluster_by_kmer(const std::vector<fq_re
         d_edgelist,
         h_edgecount
     );
-
-    // Sync
     CUDA_CHECK(cudaDeviceSynchronize());
 
     // Device variables for cluster kernel
@@ -361,8 +349,6 @@ std::vector<std::unordered_set<int>*> cu_cluster_by_kmer(const std::vector<fq_re
         CLUSTER_MAP_SIZE,
         THRESH
     );
-
-    // Sync
     CUDA_CHECK(cudaDeviceSynchronize());
 
     // Copy mem back
@@ -447,8 +433,6 @@ std::vector<cu_alignment*> cu_local_align(const std::string& REF, const std::vec
         READ_LEN,
         d_align
     );
-
-    // Sync
     CUDA_CHECK(cudaDeviceSynchronize());
 
     // Copy mem back

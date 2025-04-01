@@ -13,6 +13,7 @@
 #include "../../src/gpu/headers/local_alignment.cuh"
 #include "../../src/gpu/headers/util_structs.cuh"
 #include "../../src/gpu/headers/util.cuh"
+#include "../../src/gpu/headers/wrappers.cuh"
 
 #ifndef ANSI_ESC_COMMON
 #define ANSI_ESC_COMMON
