@@ -12,9 +12,19 @@
 #endif
 
 std::vector<fq_read*> cu_filter_fq(
-    std::vector<fq_read*> READS,
+    const std::vector<fq_read*>& READS,
     char FILTER_MODE,
     char THRESH,
     size_t K,
     double PROPORTION
+);
+
+std::unordered_map<uint64_t, uint64_t> cu_count_kmers(
+    const std::vector<fq_read*>& READS,
+    size_t K
+);
+
+std::unordered_map<uint64_t, std::unordered_set<int>> cu_index_kmers(
+    const std::vector<fq_read*>& READS,
+    size_t K
 );

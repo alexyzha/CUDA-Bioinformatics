@@ -86,10 +86,10 @@ template<typename T>
 kh_pair<T>* kh_construct(int n) {
     // Malloc
     kh_pair<T>* map;
-    cudaMalloc(&map, sizeof(kh_pair<T>) * n);
+    CUDA_CHECK(cudaMalloc(&map, sizeof(kh_pair<T>) * n));
 
     // Init all as empty
-    cudaMemset(map, 0, sizeof(kh_pair<T>) * n);
+    CUDA_CHECK(cudaMemset(map, 0, sizeof(kh_pair<T>) * n));
     return map;
 }
 

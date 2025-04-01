@@ -1,6 +1,6 @@
 #include "headers/kmer_util.cuh"
 
-__global__ void __cu_count_kmers(kh_pair<uint64_t>* MAP, char* ALL_SEQ, size_t* OFFSETS, size_t K, size_t LEN, size_t MAP_LEN) {
+__global__ void cu_kmer_count(kh_pair<uint64_t>* MAP, char* ALL_SEQ, uint32_t* OFFSETS, size_t K, size_t LEN, size_t MAP_LEN) {
     // OOB check for block/thread & K OOB check
     int SEQ_NUM = blockIdx.x * blockDim.x + threadIdx.x;
     if(SEQ_NUM >= LEN || K > K_MAX || K <= 0) {
@@ -48,7 +48,7 @@ __global__ void __cu_count_kmers(kh_pair<uint64_t>* MAP, char* ALL_SEQ, size_t* 
     }
 }
 
-__global__ void __cu_index_kmers(kh_pair<uint32_t[MAP_MAX_INDICES + 1]>* MAP, char* ALL_SEQ, size_t* OFFSETS, size_t K, size_t LEN, size_t MAP_LEN) {
+__global__ void cu_kmer_index(kh_pair<uint32_t[MAP_MAX_INDICES + 1]>* MAP, char* ALL_SEQ, uint32_t* OFFSETS, size_t K, size_t LEN, size_t MAP_LEN) {
     // OOB check for block/thread & K OOB check
     int SEQ_NUM = blockIdx.x * blockDim.x + threadIdx.x;
     if(SEQ_NUM >= LEN || K > K_MAX || K <= 0) {
@@ -100,7 +100,7 @@ __global__ void __cu_index_kmers(kh_pair<uint32_t[MAP_MAX_INDICES + 1]>* MAP, ch
     }
 }
 
-__global__ void __cu_get_kmer_overlaps(kh_pair<uint32_t[MAP_MAX_INDICES + 1]>* MAP, size_t MAP_LEN, uint32_t* EDGE_LIST, uint32_t* EDGE_COUNT, uint32_t MAX_EDGES) {
+__global__ void cu_get_kmer_overlaps(kh_pair<uint32_t[MAP_MAX_INDICES + 1]>* MAP, size_t MAP_LEN, uint32_t* EDGE_LIST, uint32_t* EDGE_COUNT, uint32_t MAX_EDGES) {
     // OOB check for block/thread
     int SEQ_NUM = blockIdx.x * blockDim.x + threadIdx.x;
     if(SEQ_NUM >= MAP_LEN) {
@@ -130,7 +130,7 @@ __global__ void __cu_get_kmer_overlaps(kh_pair<uint32_t[MAP_MAX_INDICES + 1]>* M
     }
 }
 
-__global__ void __cu_get_uf(cu_union_find* UF, size_t LEN, size_t NODES, uint32_t* EDGE_LIST, uint32_t EDGE_COUNT) {
+__global__ void cu_get_uf(cu_union_find* UF, size_t LEN, size_t NODES, uint32_t* EDGE_LIST, uint32_t EDGE_COUNT) {
     // Block/thread OOB checks
     int INDEX = (blockIdx.x * blockDim.x + threadIdx.x) * 2;
     if(INDEX + 1 >= EDGE_COUNT) {
@@ -143,7 +143,7 @@ __global__ void __cu_get_uf(cu_union_find* UF, size_t LEN, size_t NODES, uint32_
     __cu_uf_join(UF, src, dest);
 }
 
-__global__ void __cu_get_clusters(cu_union_find* UF, kh_pair<uint32_t[MAX_CLUSTER_SIZE + 1]> * MAP, size_t LEN, size_t MAP_LEN, size_t K) {
+__global__ void cu_get_clusters(cu_union_find* UF, kh_pair<uint32_t[MAX_CLUSTER_SIZE + 1]> * MAP, size_t LEN, size_t MAP_LEN, size_t K) {
     // Block/thread OOB checks
     int INDEX = blockIdx.x * blockDim.x + threadIdx.x;
     if(INDEX >= LEN) {

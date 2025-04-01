@@ -1,19 +1,19 @@
 #include "util.cuh"
 #include "util_structs.cuh"
 
-__global__ void cu_count_kmers(
+__global__ void cu_kmer_count(
     kh_pair<uint64_t>* MAP,
     char* ALL_SEQ,
-    size_t* OFFSETS,
+    uint32_t* OFFSETS,
     size_t K,
     size_t LEN,
     size_t MAP_LEN
 );
 
-__global__ void cu_index_kmers(
+__global__ void cu_kmer_index(
     kh_pair<uint32_t[MAP_MAX_INDICES + 1]>* MAP,
     char* ALL_SEQ,
-    size_t* OFFSETS,
+    uint32_t* OFFSETS,
     size_t K,
     size_t LEN,
     size_t MAP_LEN
