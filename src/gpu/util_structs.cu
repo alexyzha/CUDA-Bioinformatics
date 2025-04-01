@@ -38,7 +38,7 @@ cu_union_find* cu_uf_construct(int n) {
     return dev_uf;
 }
 
-__device__ int cu_uf_find(cu_union_find* UF, int x) {
+__device__ int __cu_uf_find(cu_union_find* UF, int x) {
     // Avoid recursion, do iteration even if it kinda sucks
     int root = x;
     while(true) {
@@ -67,17 +67,17 @@ __device__ int cu_uf_find(cu_union_find* UF, int x) {
  *  @param y `int`
  *  @return `void`
  */
-__device__ void cu_uf_join(cu_union_find* UF, int x, int y) {
-    int px = cu_uf_find(UF, x);
-    int py = cu_uf_find(UF, y);
+__device__ void __cu_uf_join(cu_union_find* UF, int x, int y) {
+    int px = __cu_uf_find(UF, x);
+    int py = __cu_uf_find(UF, y);
     if(px == py) {
         return;
     }
     
     // Need to use atomics for thread safety
     while(true) {
-        px = cu_uf_find(UF, px);
-        py = cu_uf_find(UF, py);
+        px = __cu_uf_find(UF, px);
+        py = __cu_uf_find(UF, py);
         
         // Joined
         if(px == py) {
@@ -106,15 +106,15 @@ __device__ void cu_uf_join(cu_union_find* UF, int x, int y) {
     }
 }
 
-__device__ bool cu_uf_con(cu_union_find* UF, int x, int y) {
-    return cu_uf_find(UF, x) == cu_uf_find(UF, y);
+__device__ bool __cu_uf_con(cu_union_find* UF, int x, int y) {
+    return __cu_uf_find(UF, x) == __cu_uf_find(UF, y);
 }
 
 #endif
 
 #ifdef C_KMER_HASH_TABLE
 
-__device__ uint64_t kh_hash(uint64_t key) {
+__device__ uint64_t __kh_hash(uint64_t key) {
     key = (~key) + (key << 21);
     key = key ^ (key >> 24);
     key = (key + (key << 3)) + (key << 8);

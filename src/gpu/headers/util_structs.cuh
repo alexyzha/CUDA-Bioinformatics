@@ -57,11 +57,11 @@ typedef struct {
 
 cu_union_find* cu_uf_construct(int n);
 
-__device__ int cu_uf_find(cu_union_find* UF, int x);
+__device__ int __cu_uf_find(cu_union_find* UF, int x);
 
-__device__ void cu_uf_join(cu_union_find* UF, int x, int y);
+__device__ void __cu_uf_join(cu_union_find* UF, int x, int y);
 
-__device__ bool cu_uf_con(cu_union_find* UF, int x, int y);
+__device__ bool __cu_uf_con(cu_union_find* UF, int x, int y);
 
 #endif
 
@@ -80,7 +80,7 @@ struct kh_pair {
     T value;
 };
 
-__device__ uint64_t kh_hash(uint64_t key);
+__device__ uint64_t __kh_hash(uint64_t key);
 
 template<typename T>
 kh_pair<T>* kh_construct(int n) {
@@ -107,7 +107,7 @@ __device__ void kh_insert(kh_pair<T>* map, const kh_pair<T>* pairs, size_t LEN, 
     // Get hash
     uint64_t key = pairs[LEN].key;
     T value = pairs[LEN].value;
-    uint64_t index = kh_hash(key);
+    uint64_t index = __kh_hash(key);
 
     // Linear probing
     for(int i = 0; i < MAP_SIZE; ++i) {

@@ -1,6 +1,6 @@
-#include "headers/kmers.cuh"
+#include "headers/kmer_util.cuh"
 
-__device__ void cu_count_kmers(kh_pair<uint64_t>* MAP, char* ALL_SEQ, size_t* OFFSETS, size_t K, size_t LEN, size_t MAP_LEN) {
+__global__ void __cu_count_kmers(kh_pair<uint64_t>* MAP, char* ALL_SEQ, size_t* OFFSETS, size_t K, size_t LEN, size_t MAP_LEN) {
     // OOB check for block/thread & K OOB check
     int SEQ_NUM = blockIdx.x * blockDim.x + threadIdx.x;
     if(SEQ_NUM >= LEN || K > K_MAX || K <= 0) {
@@ -26,7 +26,7 @@ __device__ void cu_count_kmers(kh_pair<uint64_t>* MAP, char* ALL_SEQ, size_t* OF
         // From index SEQ_BEGIN to SEQ_BEGIN + K - 1, hash is not yet a full kmer
         if(i >= K - 1) {
             // Get hash
-            uint64_t index = kh_hash(hash) % MAP_LEN;
+            uint64_t index = __kh_hash(hash) % MAP_LEN;
 
             // Linear probing
             for(int i = 0; i < MAP_LEN; ++i) {
@@ -48,7 +48,7 @@ __device__ void cu_count_kmers(kh_pair<uint64_t>* MAP, char* ALL_SEQ, size_t* OF
     }
 }
 
-__device__ void cu_index_kmers(kh_pair<uint32_t[MAP_MAX_INDICES + 1]>* MAP, char* ALL_SEQ, size_t* OFFSETS, size_t K, size_t LEN, size_t MAP_LEN) {
+__global__ void __cu_index_kmers(kh_pair<uint32_t[MAP_MAX_INDICES + 1]>* MAP, char* ALL_SEQ, size_t* OFFSETS, size_t K, size_t LEN, size_t MAP_LEN) {
     // OOB check for block/thread & K OOB check
     int SEQ_NUM = blockIdx.x * blockDim.x + threadIdx.x;
     if(SEQ_NUM >= LEN || K > K_MAX || K <= 0) {
@@ -74,7 +74,7 @@ __device__ void cu_index_kmers(kh_pair<uint32_t[MAP_MAX_INDICES + 1]>* MAP, char
         // From index SEQ_BEGIN to SEQ_BEGIN + K - 1, hash is not yet a full kmer
         if(i >= K - 1) {
             // Get hash
-            uint64_t index = kh_hash(hash) % MAP_LEN;
+            uint64_t index = __kh_hash(hash) % MAP_LEN;
 
             // Linear probing
             for(int i = 0; i < MAP_LEN; ++i) {
@@ -100,7 +100,7 @@ __device__ void cu_index_kmers(kh_pair<uint32_t[MAP_MAX_INDICES + 1]>* MAP, char
     }
 }
 
-__device__ void cu_get_kmer_overlaps(kh_pair<uint32_t[MAP_MAX_INDICES + 1]>* MAP, size_t MAP_LEN, uint32_t* EDGE_LIST, uint32_t* EDGE_COUNT, uint32_t MAX_EDGES) {
+__global__ void __cu_get_kmer_overlaps(kh_pair<uint32_t[MAP_MAX_INDICES + 1]>* MAP, size_t MAP_LEN, uint32_t* EDGE_LIST, uint32_t* EDGE_COUNT, uint32_t MAX_EDGES) {
     // OOB check for block/thread
     int SEQ_NUM = blockIdx.x * blockDim.x + threadIdx.x;
     if(SEQ_NUM >= MAP_LEN) {
@@ -130,7 +130,7 @@ __device__ void cu_get_kmer_overlaps(kh_pair<uint32_t[MAP_MAX_INDICES + 1]>* MAP
     }
 }
 
-__device__ void cu_get_uf(cu_union_find* UF, size_t LEN, size_t NODES, uint32_t* EDGE_LIST, uint32_t EDGE_COUNT) {
+__global__ void __cu_get_uf(cu_union_find* UF, size_t LEN, size_t NODES, uint32_t* EDGE_LIST, uint32_t EDGE_COUNT) {
     // Block/thread OOB checks
     int INDEX = (blockIdx.x * blockDim.x + threadIdx.x) * 2;
     if(INDEX + 1 >= EDGE_COUNT) {
@@ -140,10 +140,10 @@ __device__ void cu_get_uf(cu_union_find* UF, size_t LEN, size_t NODES, uint32_t*
     // UF join
     uint32_t src = EDGE_LIST[INDEX];
     uint32_t dest = EDGE_LIST[INDEX + 1];
-    cu_uf_join(UF, src, dest);
+    __cu_uf_join(UF, src, dest);
 }
 
-__device__ void cur_get_clusters{cu_union_find* UF, kh_pair<uint32_t[MAX_CLUSTER_SIZE + 1]> * MAP, size_t LEN, size_t MAP_LEN, size_t K} {
+__global__ void __cu_get_clusters(cu_union_find* UF, kh_pair<uint32_t[MAX_CLUSTER_SIZE + 1]> * MAP, size_t LEN, size_t MAP_LEN, size_t K) {
     // Block/thread OOB checks
     int INDEX = blockIdx.x * blockDim.x + threadIdx.x;
     if(INDEX >= LEN) {
@@ -151,13 +151,13 @@ __device__ void cur_get_clusters{cu_union_find* UF, kh_pair<uint32_t[MAX_CLUSTER
     }
 
     // Check root size
-    int px = cu_uf_find(UF, INDEX);
+    int px = __cu_uf_find(UF, INDEX);
     if(UF->h[px] < K) {
         return;
     }
 
     // Add to cluster
-    uint64_t index = kh_hash((ULL)INDEX) % MAP_LEN;
+    uint64_t index = __kh_hash((ULL)INDEX) % MAP_LEN;
     for(int i = 0; i < MAP_LEN; ++i) {
         int cur = (index + i) % MAP_LEN;
         uint64_t prev = atomicCAS((ULL*)&MAP[cur].key, (ULL)EMPTY, (ULL)INDEX);

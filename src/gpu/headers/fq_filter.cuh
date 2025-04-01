@@ -1,12 +1,5 @@
 #include "util_structs.cuh"
 
-#ifndef CU_FILTER_MACROS
-#define CU_FILTER_MACROS
-#define AVERAGE_DISCARD_ALL 1
-#define SINGLE_DISCARD_ALL 1
-#define PROPORTION_DISCARD_ALL 1
-#endif
-
 /*
  *  Returns bitmask [1 = keep][0 = discard] based on `FILTER_MODE`
  *  @param ALL_SEQ `char*` all `LEN` sequences in order, flattened
@@ -18,7 +11,7 @@
  *  @param PROPORTION `double` default = 0.0, used for filter modes with proportions
  *  @return `void`
  */
-__device__ void cu_filter_reads(
+__global__ void cu_filter_reads(
     char* ALL_SEQ,
     uint32_t* OFFSETS,
     size_t LEN,
@@ -38,7 +31,7 @@ __device__ void cu_filter_reads(
  *  @param PROPORTION `double` default = 0.0
  *  @return `void`
  */
-__device__ void cu_filter_reads_sliding_window(
+__global__ void cu_filter_reads_sw(
     char* ALL_SEQ,
     uint32_t* OFFSETS,
     size_t LEN,

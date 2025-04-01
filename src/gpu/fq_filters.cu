@@ -1,6 +1,6 @@
-#include "headers/fq_filters.cuh"
+#include "headers/fq_filter.cuh"
 
-__device__ void cu_filter_reads(char* ALL_SEQ, uint32_t* OFFSETS, size_t LEN, char FILTER_MODE, char THRESH, uint64_t* FILTER_MASK, double PROPORTION) {
+__global__ void cu_filter_reads(char* ALL_SEQ, uint32_t* OFFSETS, size_t LEN, char FILTER_MODE, char THRESH, uint64_t* FILTER_MASK, double PROPORTION) {
     // Block/thread OOB checks
     int SEQ_NUM = blockIdx.x * blockDim.x + threadIdx.x;
     if(SEQ_NUM >= LEN) {
@@ -13,7 +13,7 @@ __device__ void cu_filter_reads(char* ALL_SEQ, uint32_t* OFFSETS, size_t LEN, ch
 
     // Check seq
     switch(FILTER_MODE) {
-        case AVERAGE_DISCARD_ALL: {
+        case AVERAGE_DISCARD_WHOLE: {
             uint64_t sum = 0;
             for(int i = 0; i < SEQ_SIZE; ++i) {
                 sum += ALL_SEQ[SEQ_BEGIN + 1];
@@ -26,7 +26,7 @@ __device__ void cu_filter_reads(char* ALL_SEQ, uint32_t* OFFSETS, size_t LEN, ch
             break;
         }
 
-        case SINGLE_DISCARD_ALL: {
+        case SINGLE_DISCARD_WHOLE: {
             for(int i = 0; i < SEQ_SIZE; ++i) {
                 if(ALL_SEQ[SEQ_BEGIN + i] < THRESH) {
                     // Discard
@@ -40,7 +40,7 @@ __device__ void cu_filter_reads(char* ALL_SEQ, uint32_t* OFFSETS, size_t LEN, ch
         }
 
         // (% of quality < THRESH) > PERC = discard
-        case PROPORTION_DISCARD_ALL: {
+        case PROPORTION_DISCARD_WHOLE: {
             // Count under thresh
             uint64_t count = 0;
             for(int i = 0; i < SEQ_SIZE; ++i) {
@@ -58,7 +58,7 @@ __device__ void cu_filter_reads(char* ALL_SEQ, uint32_t* OFFSETS, size_t LEN, ch
     }
 }
 
-__device__ void cu_filter_reads_sliding_window(char* ALL_SEQ, uint32_t* OFFSETS, size_t LEN, size_t K, char THRESH, double PROPORTION) {
+__global__ void cu_filter_reads_sw(char* ALL_SEQ, uint32_t* OFFSETS, size_t LEN, size_t K, char THRESH, double PROPORTION) {
     // Block/thread OOB checks
     int SEQ_NUM = blockIdx.x * blockDim.x + threadIdx.x;
     if(SEQ_NUM >= LEN) {
