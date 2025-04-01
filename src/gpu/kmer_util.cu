@@ -137,10 +137,8 @@ __global__ void cu_get_uf(cu_union_find* UF, size_t LEN, size_t NODES, uint32_t*
         return;
     }
 
-    // UF join
-    uint32_t src = EDGE_LIST[INDEX];
-    uint32_t dest = EDGE_LIST[INDEX + 1];
-    __cu_uf_join(UF, src, dest);
+    // UF join nodes in edge
+    __cu_uf_join(UF, EDGE_LIST[INDEX], EDGE_LIST[INDEX + 1]);
 }
 
 __global__ void cu_get_clusters(cu_union_find* UF, kh_pair<uint32_t[MAP_MAX_INDICES + 1]>* MAP, size_t LEN, size_t MAP_LEN, size_t K) {

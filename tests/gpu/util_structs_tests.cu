@@ -40,9 +40,41 @@ void CU_UTIL_STRUCTS_TESTS(std::vector<TEST_RESULT*>& RESULTS) {
     
     // Hashing test
     RESULTS.push_back(new TEST("CU_UTIL_STRUCTS", "KMER_HASHING", [](){
-        
-        // __global__ kernel done
+        // Create test variables
+        uint64_t* d_key;
+        uint64_t* d_value;
+        std::vector<uint64_t> h_key(1024, rand());
+        auto validate_hash = [](int key, int hash) -> bool {
+            key = (~key) + (key << 21);
+            key = key ^ (key >> 24);
+            key = (key + (key << 3)) + (key << 8);
+            key = key ^ (key >> 14);
+            key = (key + (key << 2)) + (key << 4);
+            key = key ^ (key >> 28);
+            key = key + (key << 31);
+            return (key == hash);
+        };
 
+        // Allocate mem, set/copy mem
+        CUDA_CHECK(cudaMalloc(&d_key, sizeof(uint64_t) * 1024));
+        CUDA_CHECK(cudaMalloc(&d_value, sizeof(uint64_t) * 1024));
+        CUDA_CHECK(cudaMemset(d_value, 0, sizeof(uint64_t) * 1024));
+        CUDA_CHECK(cudaMemcpy(d_key, h_key.data(), sizeof(uint64_t) * 1024, cudaMemcpyHostToDevice));
+
+        // Run kernel
+        cu_hashing <<<32, 32>>> (d_value, d_key, 1024);
+        CUDA_CHECK(cudaDeviceSynchronize());
+
+        // Copy mem back & validate results
+        std::vector<uint64_t> h_value(1024);
+        CUDA_CHECK(cudaMemcpy(h_value, d_value, sizeof(uint64_t) * 1024, cudaMemcpyDeviceToHost));
+        for(int i = 0; i < 1024; ++i) {
+            EXPECT_TRUE(validate_hash(h_key[i], h_value[i]));
+        }
+
+        // Clean up
+        CUDA_CHECK(cudaFree(d_value));
+        CUDA_CHECK(cudaFree(d_key));
     }));
 
     /*

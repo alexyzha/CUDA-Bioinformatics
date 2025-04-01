@@ -32,7 +32,7 @@ __global__ void cu_get_uf(
     size_t LEN,                         // Size of UF arrays = number of nodes
     size_t NODES,
     uint32_t* EDGE_LIST,
-    uint32_t EDGE_COUNT
+    uint32_t EDGE_COUNT                 // Number of pairs in edge list * 2
 );
 
 __global__ void cu_get_clusters(
