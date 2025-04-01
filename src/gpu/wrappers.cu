@@ -103,9 +103,9 @@ std::vector<fq_read*> cu_filter_fq(const std::vector<fq_read*>& READS, char FILT
     }
     
     // Cleanup and return
-    CUDA_CHECK(cudaFree(d_allseq));
-    CUDA_CHECK(cudaFree(d_offsets));
     CUDA_CHECK(cudaFree(d_filter));
+    CUDA_CHECK(cudaFree(d_offsets));
+    CUDA_CHECK(cudaFree(d_allseq));
     return filtered_reads;
 }
 
@@ -178,8 +178,8 @@ std::unordered_map<uint64_t, uint64_t> cu_count_kmers(const std::vector<fq_read*
     }
 
     // Clean and return
-    CUDA_CHECK(cudaFree(d_allseq));
     CUDA_CHECK(cudaFree(d_offsets));
+    CUDA_CHECK(cudaFree(d_allseq));
     CUDA_CHECK(cudaFree(d_map));
     return ret;
 }
@@ -247,8 +247,8 @@ std::unordered_map<uint64_t, std::unordered_set<int>> cu_index_kmers(const std::
     }
 
     // Clean and return
-    CUDA_CHECK(cudaFree(d_allseq));
     CUDA_CHECK(cudaFree(d_offsets));
+    CUDA_CHECK(cudaFree(d_allseq));
     CUDA_CHECK(cudaFree(d_map));
     return ret;
 }
@@ -389,12 +389,12 @@ std::vector<std::unordered_set<int>*> cu_cluster_by_kmer(const std::vector<fq_re
     }
 
     // Clean and return
-    CUDA_CHECK(cudaFree(d_allseq));
-    CUDA_CHECK(cudaFree(d_offsets));
-    CUDA_CHECK(cudaFree(d_edgelist));
-    CUDA_CHECK(cudaFree(d_edgecount_ptr));
     CUDA_CHECK(cudaFree(d_clusters));
     cu_uf_destruct(d_uf);
+    CUDA_CHECK(cudaFree(d_edgecount_ptr));
+    CUDA_CHECK(cudaFree(d_edgelist));
+    CUDA_CHECK(cudaFree(d_offsets));
+    CUDA_CHECK(cudaFree(d_allseq));
     return ret;
 }
 
@@ -403,14 +403,15 @@ std::vector<cu_alignment*> cu_local_align(const std::string& REF, const std::vec
     int READ_LEN = READS.size();
     int THREADS = MAX_THREADS;
     int BLOCKS = (READ_LEN / MAX_THREADS) + 1;
-    int DP_SIZE = (MAX_REF_LEN + 1) * (MAX_READ_LEN + 1) * READ_LEN;                // 200 * 170 * 100k ~= 3.4g
-    int CIGAR_SIZE = (MAX_CIGAR_LEN + 1) * READ_LEN;                                // 340 * 100k ~= 34m
+    int DP_SIZE = (MAX_REF_LEN + 1) * (MAX_READ_LEN + 1) * READ_LEN;                // 200 * 170 * 4b * 25kseq ~= 3.4gb
+    int CIGAR_SIZE = (MAX_CIGAR_LEN + 1) * READ_LEN;                                // 340 * 4b * 25kseq ~= 34m
+    int ALIGN_LEN = READ_LEN * 3;
 
     // Host variables
     std::string temp = "";
     std::vector<uint32_t> h_offsets(READ_LEN);
     for(int i = 0; i < READ_LEN; ++i) {
-        temp + READS[i]->get_seq();
+        temp += READS[i]->get_seq();
         h_offsets[i] = temp.size() - 1;
     }
     int SEQ_LEN = temp.size() + 1;
@@ -421,19 +422,19 @@ std::vector<cu_alignment*> cu_local_align(const std::string& REF, const std::vec
     char* d_cigarbuf;
     uint32_t* d_offsets;
     int* d_cache;
-    cu_quad* d_align;
+    int* d_align;
 
     // Allocate mem for device variables
     CUDA_CHECK(cudaMalloc(&d_allseq, sizeof(char) * SEQ_LEN));
     CUDA_CHECK(cudaMalloc(&d_cigarbuf, sizeof(char) * CIGAR_SIZE));
     CUDA_CHECK(cudaMalloc(&d_offsets, sizeof(uint32_t) * READ_LEN));
     CUDA_CHECK(cudaMalloc(&d_cache, sizeof(int) * DP_SIZE));
-    CUDA_CHECK(cudaMalloc(&d_align, sizeof(cu_quad) * READ_LEN));
+    CUDA_CHECK(cudaMalloc(&d_align, sizeof(int) * ALIGN_LEN));
     
     // Copy mem host -> device/set mem
     CUDA_CHECK(cudaMemset(d_cigarbuf, 0, sizeof(char) * CIGAR_SIZE));
     CUDA_CHECK(cudaMemset(d_cache, 0, sizeof(int) * DP_SIZE));
-    CUDA_CHECK(cudaMemset(d_align, 0, sizeof(cu_quad) * READ_LEN));
+    CUDA_CHECK(cudaMemset(d_align, 0, sizeof(int) * ALIGN_LEN));
     CUDA_CHECK(cudaMemcpy(d_allseq, h_allseq, sizeof(char) * SEQ_LEN, cudaMemcpyHostToDevice));
     CUDA_CHECK(cudaMemcpy(d_offsets, h_offsets.data(), sizeof(uint32_t) * READ_LEN, cudaMemcpyHostToDevice));
     
@@ -451,28 +452,30 @@ std::vector<cu_alignment*> cu_local_align(const std::string& REF, const std::vec
     CUDA_CHECK(cudaDeviceSynchronize());
 
     // Copy mem back
-    std::vector<cu_quad> h_align(READ_LEN);
-    CUDA_CHECK(cudaMemcpy(h_align.data(), d_align, sizeof(cu_quad) * READ_LEN, cudaMemcpyDeviceToHost));
+    std::vector<int> h_align(ALIGN_LEN);
+    std::vector<char> h_cigarbuf(CIGAR_SIZE);
+    CUDA_CHECK(cudaMemcpy(h_cigarbuf.data(), d_cigarbuf, sizeof(char) * CIGAR_SIZE, cudaMemcpyDeviceToHost));
+    CUDA_CHECK(cudaMemcpy(h_align.data(), d_align, sizeof(int) * ALIGN_LEN, cudaMemcpyDeviceToHost));
 
-    /*
-    
-        NEED TO MAKE alignment array and then return it
-        make cigar string from copying d_cigarbuf -> h_cigarbuf and using set indiv_cigar_buf_begin and cigar_offset from return
-    
-    */
-    
+    // Format data
+    std::vector<cu_alignment*> ret;
+    for(int i = 0; i < READ_LEN; ++i) {
+        int H_ALIGN_BEGIN = i * 3;
+        int CIGAR_BEGIN = (MAX_CIGAR_LEN + 1) * i;
+        h_cigarbuf[CIGAR_BEGIN + MAX_CIGAR_LEN] = '\0';
+        ret.push_back(new cu_alignment{
+            new std::string(h_cigarbuf.data() + CIGAR_BEGIN),
+            h_align[H_ALIGN_BEGIN],
+            h_align[H_ALIGN_BEGIN + 1],
+            h_align[H_ALIGN_BEGIN + 2]
+        });
+    }
 
+    // Clean and return
+    CUDA_CHECK(cudaFree(d_align));
+    CUDA_CHECK(cudaFree(d_cache));
+    CUDA_CHECK(cudaFree(d_offsets));
+    CUDA_CHECK(cudaFree(d_cigarbuf));
+    CUDA_CHECK(cudaFree(d_allseq));
+    return ret;
 }
-
-
-
-
-
-
-
-
-
-
-
-
-

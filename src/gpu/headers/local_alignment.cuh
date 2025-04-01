@@ -7,8 +7,8 @@
  *  @param CACHE `int*` flattened DP cache
  *  @param OFFSETS `size_t*` size_t array containing end indices of all sequences
  *  @param LEN `size_t` number of sequences in `ALL_SEQ` including the reference sequence
- *  @param RET `cu_alignment*` Exp length: `LEN`
- *  @return Fills `cu_alignment[i]`, where `i` = `blockIdx.x * blockDim.x + threadIdx.x`
+ *  @param RET `int*` Exp length: `LEN * 3`
+ *  @return Fills `int[i(+0:+2)]`, where `i` = `(blockIdx.x * blockDim.x + threadIdx.x) * 3`
  */
 __global__ void cu_local_alignment(
     char* ALL_SEQ,
@@ -16,7 +16,7 @@ __global__ void cu_local_alignment(
     int* CACHE,
     uint32_t* OFFSETS,
     size_t LEN,
-    cu_quad* RET
+    int* RET
 );
 
 /*
@@ -28,7 +28,8 @@ __global__ void cu_local_alignment(
  *  @param OFFSETS `size_t*` size_t array containing end indices of all sequences
  *  @param LEN `size_t` number of sequences in `ALL_SEQ` including the reference sequence
  *  @param REF_SIZE `size_t` reference sequence length
- *  @return Fills `cu_alignment[i]`, where `i` = `blockIdx.x * blockDim.x + threadIdx.x`
+ *  @param RET `int*` Exp length: `LEN * 3`
+ *  @return Fills `int[i(+0:+2)]`, where `i` = `(blockIdx.x * blockDim.x + threadIdx.x) * 3`
  */
 __global__ void cu_fq_local_alignment(
     char* REF,
@@ -38,5 +39,5 @@ __global__ void cu_fq_local_alignment(
     uint32_t* OFFSETS,
     size_t LEN,
     size_t REF_SIZE,
-    cu_quad* RET
+    int* RET
 );

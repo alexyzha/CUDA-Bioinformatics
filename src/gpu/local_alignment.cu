@@ -1,6 +1,6 @@
 #include "headers/local_alignment.cuh"
 
-__global__ void cu_local_alignment(char* ALL_SEQ, char* CIGAR_BUF, int* CACHE, uint32_t* OFFSETS, size_t LEN, cu_quad* RET) {
+__global__ void cu_local_alignment(char* ALL_SEQ, char* CIGAR_BUF, int* CACHE, uint32_t* OFFSETS, size_t LEN, int* RET) {
     // OOB check for block/thread
     int SEQ_NUM = blockIdx.x * blockDim.x + threadIdx.x;
     if(SEQ_NUM >= LEN || !SEQ_NUM) {
@@ -109,13 +109,13 @@ __global__ void cu_local_alignment(char* ALL_SEQ, char* CIGAR_BUF, int* CACHE, u
     }
 
     // "Return" in RET
-    RET[SEQ_NUM].cigar_offset = CIGAR_BEGIN + cigar_iter;
-    RET[SEQ_NUM].end_ref = MAX_I - 1;
-    RET[SEQ_NUM].end_read = MAX_J - 1;
-    RET[SEQ_NUM].score = MAX_SCORE;
+    int RET_BEGIN = SEQ_NUM * 3;
+    RET[RET_BEGIN] = MAX_I - 1;
+    RET[RET_BEGIN + 1] = MAX_J - 1;
+    RET[RET_BEGIN + 2] = MAX_SCORE;
 }
 
-__global__ void cu_fq_local_alignment(char* REF, cu_fq_read* READS, char* CIGAR_BUF, int* CACHE, uint32_t* OFFSETS, size_t LEN, size_t REF_SIZE, cu_quad* RET) {
+__global__ void cu_fq_local_alignment(char* REF, cu_fq_read* READS, char* CIGAR_BUF, int* CACHE, uint32_t* OFFSETS, size_t LEN, size_t REF_SIZE, int* RET) {
     // OOB check for block/thread
     int SEQ_NUM = blockIdx.x * blockDim.x + threadIdx.x;
     if(SEQ_NUM >= LEN || !SEQ_NUM) {
@@ -221,8 +221,8 @@ __global__ void cu_fq_local_alignment(char* REF, cu_fq_read* READS, char* CIGAR_
     }
 
     // "Return" in RET
-    RET[SEQ_NUM].cigar_offset = CIGAR_BEGIN + cigar_iter;
-    RET[SEQ_NUM].end_ref = MAX_I - 1;
-    RET[SEQ_NUM].end_read = MAX_J - 1;
-    RET[SEQ_NUM].score = MAX_SCORE;
+    int RET_BEGIN = SEQ_NUM * 3;
+    RET[RET_BEGIN] = MAX_I - 1;
+    RET[RET_BEGIN + 1] = MAX_J - 1;
+    RET[RET_BEGIN + 2] = MAX_SCORE;
 }
