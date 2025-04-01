@@ -11,11 +11,18 @@
  *  @param score `int` max smith waterman alignment score
  */
 typedef struct {
-    char* cigar;
+    std::string cigar;
     int end_ref;
     int end_read;
     int score;
 } cu_alignment;
+
+typedef struct {
+    int cigar_offset;
+    int end_ref;
+    int end_read;
+    int score;
+} cu_quad;
 
 #endif
 

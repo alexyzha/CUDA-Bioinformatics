@@ -14,9 +14,9 @@ __global__ void cu_local_alignment(
     char* ALL_SEQ,
     char* CIGAR_BUF,
     int* CACHE,
-    size_t* OFFSETS,
+    uint32_t* OFFSETS,
     size_t LEN,
-    cu_alignment* RET
+    cu_quad* RET
 );
 
 /*
@@ -35,8 +35,8 @@ __global__ void cu_fq_local_alignment(
     cu_fq_read* READS,
     char* CIGAR_BUF,
     int* CACHE,
-    size_t* OFFSETS,
+    uint32_t* OFFSETS,
     size_t LEN,
     size_t REF_SIZE,
-    cu_alignment* RET
+    cu_quad* RET
 );

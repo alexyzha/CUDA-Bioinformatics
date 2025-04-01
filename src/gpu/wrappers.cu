@@ -26,9 +26,9 @@ std::vector<fq_read*> cu_filter_fq(const std::vector<fq_read*>& READS, char FILT
     CUDA_CHECK(cudaMalloc(&d_allseq, sizeof(char) * SEQ_LEN));
     CUDA_CHECK(cudaMalloc(&d_offsets, sizeof(uint32_t) * READ_LEN));
     CUDA_CHECK(cudaMalloc(&d_filter, sizeof(uint64_t) * FILTER_LENGTH));
+    
+    // Copy mem host -> device/set mem
     CUDA_CHECK(cudaMemset(d_filter, 0, sizeof(uint64_t) * FILTER_LENGTH));
-
-    // Copy mem host -> device
     CUDA_CHECK(cudaMemcpy(d_allseq, h_allseq, sizeof(char) * SEQ_LEN, cudaMemcpyHostToDevice));
     CUDA_CHECK(cudaMemcpy(d_offsets, h_offsets.data(), sizeof(uint32_t) * READ_LEN, cudaMemcpyHostToDevice));
 
@@ -316,6 +316,8 @@ std::vector<std::unordered_set<int>*> cu_cluster_by_kmer(const std::vector<fq_re
     // Allocate mem for device variables
     CUDA_CHECK(cudaMalloc(&d_edgelist, sizeof(uint32_t) * MAX_EDGES));
     CUDA_CHECK(cudaMalloc(&d_edgecount_ptr, sizeof(uint32_t)));
+
+    // Set values for device variables
     CUDA_CHECK(cudaMemset(d_edgelist, 0, sizeof(uint32_t) * MAX_EDGES));
     CUDA_CHECK(cudaMemset(d_edgecount_ptr, 0, sizeof(uint32_t)));
 
@@ -396,7 +398,71 @@ std::vector<std::unordered_set<int>*> cu_cluster_by_kmer(const std::vector<fq_re
     return ret;
 }
 
+std::vector<cu_alignment*> cu_local_align(const std::string& REF, const std::vector<fq_read*>& READS) {
+    // Size consts
+    int READ_LEN = READS.size();
+    int THREADS = MAX_THREADS;
+    int BLOCKS = (READ_LEN / MAX_THREADS) + 1;
+    int DP_SIZE = (MAX_REF_LEN + 1) * (MAX_READ_LEN + 1) * READ_LEN;                // 200 * 170 * 100k ~= 3.4g
+    int CIGAR_SIZE = (MAX_CIGAR_LEN + 1) * READ_LEN;                                // 340 * 100k ~= 34m
 
+    // Host variables
+    std::string temp = "";
+    std::vector<uint32_t> h_offsets(READ_LEN);
+    for(int i = 0; i < READ_LEN; ++i) {
+        temp + READS[i]->get_seq();
+        h_offsets[i] = temp.size() - 1;
+    }
+    int SEQ_LEN = temp.size() + 1;
+    const char* h_allseq = temp.c_str();
+
+    // Device variables
+    char* d_allseq;
+    char* d_cigarbuf;
+    uint32_t* d_offsets;
+    int* d_cache;
+    cu_quad* d_align;
+
+    // Allocate mem for device variables
+    CUDA_CHECK(cudaMalloc(&d_allseq, sizeof(char) * SEQ_LEN));
+    CUDA_CHECK(cudaMalloc(&d_cigarbuf, sizeof(char) * CIGAR_SIZE));
+    CUDA_CHECK(cudaMalloc(&d_offsets, sizeof(uint32_t) * READ_LEN));
+    CUDA_CHECK(cudaMalloc(&d_cache, sizeof(int) * DP_SIZE));
+    CUDA_CHECK(cudaMalloc(&d_align, sizeof(cu_quad) * READ_LEN));
+    
+    // Copy mem host -> device/set mem
+    CUDA_CHECK(cudaMemset(d_cigarbuf, 0, sizeof(char) * CIGAR_SIZE));
+    CUDA_CHECK(cudaMemset(d_cache, 0, sizeof(int) * DP_SIZE));
+    CUDA_CHECK(cudaMemset(d_align, 0, sizeof(cu_quad) * READ_LEN));
+    CUDA_CHECK(cudaMemcpy(d_allseq, h_allseq, sizeof(char) * SEQ_LEN, cudaMemcpyHostToDevice));
+    CUDA_CHECK(cudaMemcpy(d_offsets, h_offsets.data(), sizeof(uint32_t) * READ_LEN, cudaMemcpyHostToDevice));
+    
+    // Run local align kernel
+    cu_local_alignment <<<BLOCKS, THREADS>>> (
+        d_allseq,
+        d_cigarbuf,
+        d_cache,
+        d_offsets,
+        READ_LEN,
+        d_align
+    );
+
+    // Sync
+    CUDA_CHECK(cudaDeviceSynchronize());
+
+    // Copy mem back
+    std::vector<cu_quad> h_align(READ_LEN);
+    CUDA_CHECK(cudaMemcpy(h_align.data(), d_align, sizeof(cu_quad) * READ_LEN, cudaMemcpyDeviceToHost));
+
+    /*
+    
+        NEED TO MAKE alignment array and then return it
+        make cigar string from copying d_cigarbuf -> h_cigarbuf and using set indiv_cigar_buf_begin and cigar_offset from return
+    
+    */
+    
+
+}
 
 
 
