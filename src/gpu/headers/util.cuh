@@ -34,7 +34,6 @@
 #define CU_KMER_MACROS
 #define K_MAX 32
 #define MAP_MAX_INDICES 128
-#define MAX_CLUSTER_SIZE 128
 #endif
 
 #ifndef CU_LOCAL_ALIGNMENT_MACROS

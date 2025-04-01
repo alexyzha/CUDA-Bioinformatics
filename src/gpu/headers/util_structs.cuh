@@ -57,6 +57,8 @@ typedef struct {
 
 cu_union_find* cu_uf_construct(int n);
 
+void cu_uf_destruct(cu_union_find* d_uf);
+
 __device__ int __cu_uf_find(cu_union_find* UF, int x);
 
 __device__ void __cu_uf_join(cu_union_find* UF, int x, int y);

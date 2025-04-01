@@ -185,17 +185,7 @@ std::unordered_map<uint64_t, uint64_t> cu_count_kmers(const std::vector<fq_read*
 }
 
 std::unordered_map<uint64_t, std::unordered_set<int>> cu_index_kmers(const std::vector<fq_read*>& READS, size_t K) {
-    /*
-     *  Given: 130 * 8 = 1040 bytes per kh_pair, MAP_SIZE = 2 * total kmers, total bytes = 4^k * 2 * 1040
-     *  k = 10 requires 2.18B bytes = 2gb vram/normal ram
-     *  My GPU has 8gb vram...
-     *  Note to self: consider setting K_MAX as 10 or 11
-     *  -> Map needs size to be 2x the number of elements it's holding for better nocollide
-     */
-    if(K > 10) {
-        throw std::runtime_error("K is too large, possible memory issues.");
-    }
-
+    
     // Size variables
     int READ_LEN = READS.size(); 
     uint64_t MAP_SIZE = (1ULL << (2 * K)) * 2;
@@ -262,3 +252,161 @@ std::unordered_map<uint64_t, std::unordered_set<int>> cu_index_kmers(const std::
     CUDA_CHECK(cudaFree(d_map));
     return ret;
 }
+
+std::vector<std::unordered_set<int>*> cu_cluster_by_kmer(const std::vector<fq_read*>& READS, size_t K, size_t THRESH) {
+    /*
+     *  Given: 130 * 8 = 1040 bytes per kh_pair, MAP_SIZE = 2 * total kmers, total bytes = 4^k * 2 * 1040
+     *  k = 10 requires 2.18B bytes = 2gb vram/normal ram
+     *  My GPU has 8gb vram...
+     *  Note to self: consider setting K_MAX as 10 or 11
+     *  -> Map needs size to be 2x the number of elements it's holding for better nocollide
+     */
+    if(K > 10) {
+        throw std::runtime_error("K is too large, possible memory issues.");
+    }
+
+    // Size variables
+    int READ_LEN = READS.size(); 
+    uint64_t MAP_SIZE = (1ULL << (2 * K)) * 2;
+    uint64_t MAX_EDGES = (ULL)READ_LEN * MAP_MAX_INDICES;
+    uint64_t UF_SIZE = (ULL)READ_LEN;
+    int THREADS = MAX_THREADS;
+    int CLUSTER_MAP_SIZE = READ_LEN * 2;
+
+    // Host variables
+    std::string temp = "";
+    std::vector<uint32_t> h_offsets(READ_LEN);
+    for(int i = 0; i < READ_LEN; ++i) {
+        temp += READS[i]->get_seq();
+        h_offsets[i] = temp.size() - 1;
+    }
+    int SEQ_LEN = temp.size() + 1;                  // temp + '\0'
+    const char* h_allseq = temp.c_str();
+    
+    // Device variables for kmer indexing
+    char* d_allseq;
+    uint32_t* d_offsets;
+    kh_pair<uint32_t[MAP_MAX_INDICES + 1]>* d_map = kh_construct<uint32_t[MAP_MAX_INDICES + 1]>(MAP_SIZE);
+
+    // Allocate mem for device variables
+    CUDA_CHECK(cudaMalloc(&d_allseq, sizeof(char) * SEQ_LEN));
+    CUDA_CHECK(cudaMalloc(&d_offsets, sizeof(uint32_t) * READ_LEN));
+
+    // Copy mem host -> device
+    CUDA_CHECK(cudaMemcpy(d_allseq, h_allseq, sizeof(char) * SEQ_LEN, cudaMemcpyHostToDevice));
+    CUDA_CHECK(cudaMemcpy(d_offsets, h_offsets.data(), sizeof(uint32_t) * READ_LEN, cudaMemcpyHostToDevice));
+
+    // Run kmer indexing kernel
+    cu_kmer_index <<<(READ_LEN / THREADS) + 1, THREADS>>> (
+        d_map,
+        d_allseq,
+        d_offsets,
+        K,
+        READ_LEN,
+        MAP_SIZE
+    );
+
+    // Sync
+    CUDA_CHECK(cudaDeviceSynchronize());
+
+    // Device variables for kmer overlaps
+    uint32_t* d_edgelist;
+    uint32_t* d_edgecount_ptr;
+
+    // Allocate mem for device variables
+    CUDA_CHECK(cudaMalloc(&d_edgelist, sizeof(uint32_t) * MAX_EDGES));
+    CUDA_CHECK(cudaMalloc(&d_edgecount_ptr, sizeof(uint32_t)));
+    CUDA_CHECK(cudaMemset(d_edgelist, 0, sizeof(uint32_t) * MAX_EDGES));
+    CUDA_CHECK(cudaMemset(d_edgecount_ptr, 0, sizeof(uint32_t)));
+
+    // Run kmer overlap kernel
+    cu_get_kmer_overlaps <<<(MAP_SIZE / THREADS) + 1, THREADS>>> (
+        d_map,
+        MAP_SIZE,
+        d_edgelist,
+        d_edgecount_ptr,
+        MAX_EDGES
+    );
+
+    // Sync
+    CUDA_CHECK(cudaDeviceSynchronize());
+
+    // Device/host variables for union find
+    cu_union_find* d_uf = cu_uf_construct(UF_SIZE);
+    uint32_t h_edgecount = 0;
+    CUDA_CHECK(cudaMemcpy(&h_edgecount, d_edgecount_ptr, sizeof(uint32_t), cudaMemcpyDeviceToHost));
+
+    // Run UF kernel
+    cu_get_uf <<<((h_edgecount / 2) / THREADS) + 1, THREADS>>> (
+        d_uf,
+        UF_SIZE,
+        READ_LEN,
+        d_edgelist,
+        h_edgecount
+    );
+
+    // Sync
+    CUDA_CHECK(cudaDeviceSynchronize());
+
+    // Device variables for cluster kernel
+    kh_pair<uint32_t[MAP_MAX_INDICES + 1]>* d_clusters = kh_construct<uint32_t[MAP_MAX_INDICES + 1]>(CLUSTER_MAP_SIZE);
+
+    // Run cluster kernel
+    cu_get_clusters <<<UF_SIZE, THREADS>>> (
+        d_uf,
+        d_clusters,
+        UF_SIZE,
+        CLUSTER_MAP_SIZE,
+        THRESH
+    );
+
+    // Sync
+    CUDA_CHECK(cudaDeviceSynchronize());
+
+    // Copy mem back
+    std::vector<kh_pair<uint32_t[MAP_MAX_INDICES + 1]>> h_ret_map(CLUSTER_MAP_SIZE);
+    CUDA_CHECK(cudaMemcpy(h_ret_map.data(), d_clusters, sizeof(kh_pair<uint32_t[MAP_MAX_INDICES + 1]>) * CLUSTER_MAP_SIZE, cudaMemcpyDeviceToHost));
+
+    // Format data
+    std::vector<std::unordered_set<int>*> ret(READ_LEN);
+    for(auto& i : ret) {
+        i = new std::unordered_set<int>();
+        i->reserve(MAP_MAX_INDICES / 8);
+    }
+
+    // Enter data
+    for(int i = 0; i < CLUSTER_MAP_SIZE; ++i) {
+        if(h_ret_map[i].key == EMPTY) {
+            continue;
+        }
+
+        // Insert up until MAP_MAX_INDICES indices
+        for(int j = 1; j <= h_ret_map[i].value[0]; ++j) {
+            ret[h_ret_map[i].key]->insert(h_ret_map[i].value[j]);
+        }
+    }
+
+    // Clean and return
+    CUDA_CHECK(cudaFree(d_allseq));
+    CUDA_CHECK(cudaFree(d_offsets));
+    CUDA_CHECK(cudaFree(d_edgelist));
+    CUDA_CHECK(cudaFree(d_edgecount_ptr));
+    CUDA_CHECK(cudaFree(d_clusters));
+    cu_uf_destruct(d_uf);
+    return ret;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

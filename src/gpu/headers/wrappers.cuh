@@ -28,3 +28,9 @@ std::unordered_map<uint64_t, std::unordered_set<int>> cu_index_kmers(
     const std::vector<fq_read*>& READS,
     size_t K
 );
+
+std::vector<std::unordered_set<int>*> cu_cluster_by_kmer(
+    const std::vector<fq_read*>& READS, 
+    size_t K, 
+    size_t THRESH
+);

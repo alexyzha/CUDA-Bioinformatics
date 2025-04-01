@@ -143,7 +143,7 @@ __global__ void cu_get_uf(cu_union_find* UF, size_t LEN, size_t NODES, uint32_t*
     __cu_uf_join(UF, src, dest);
 }
 
-__global__ void cu_get_clusters(cu_union_find* UF, kh_pair<uint32_t[MAX_CLUSTER_SIZE + 1]> * MAP, size_t LEN, size_t MAP_LEN, size_t K) {
+__global__ void cu_get_clusters(cu_union_find* UF, kh_pair<uint32_t[MAP_MAX_INDICES + 1]>* MAP, size_t LEN, size_t MAP_LEN, size_t K) {
     // Block/thread OOB checks
     int INDEX = blockIdx.x * blockDim.x + threadIdx.x;
     if(INDEX >= LEN) {
@@ -169,7 +169,7 @@ __global__ void cu_get_clusters(cu_union_find* UF, kh_pair<uint32_t[MAX_CLUSTER_
             uint32_t count = atomicAdd(&cluster[0], 1);
 
             // Prevent overflow/add index to list
-            if(count < MAX_CLUSTER_SIZE) {
+            if(count < MAP_MAX_INDICES) {
                 cluster[count + 1] = INDEX;
             } else {
                 atomicSub(&cluster[0], 1);

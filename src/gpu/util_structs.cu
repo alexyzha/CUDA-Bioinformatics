@@ -8,8 +8,8 @@ cu_union_find* cu_uf_construct(int n) {
     uint32_t* host_p = new uint32_t[n];
     uint32_t* dev_h;
     uint32_t* dev_p;
-    cudaMalloc(&dev_h, sizeof(uint32_t) * n);
-    cudaMalloc(&dev_p, sizeof(uint32_t) * n);
+    CUDA_CHECK(cudaMalloc(&dev_h, sizeof(uint32_t) * n));
+    CUDA_CHECK(cudaMalloc(&dev_p, sizeof(uint32_t) * n));
 
     // Init values for union find
     for(int i = 0; i < n; ++i) {
@@ -18,8 +18,8 @@ cu_union_find* cu_uf_construct(int n) {
     }
 
     // Copy mem over
-    cudaMemcpy(dev_h, host_h, sizeof(uint32_t) * n, cudaMemcpyHostToDevice);
-    cudaMemcpy(dev_p, host_p, sizeof(uint32_t) * n, cudaMemcpyHostToDevice);
+    CUDA_CHECK(cudaMemcpy(dev_h, host_h, sizeof(uint32_t) * n, cudaMemcpyHostToDevice));
+    CUDA_CHECK(cudaMemcpy(dev_p, host_p, sizeof(uint32_t) * n, cudaMemcpyHostToDevice));
 
     // Create host side struct
     cu_union_find host_uf;
@@ -29,13 +29,26 @@ cu_union_find* cu_uf_construct(int n) {
 
     // Copy host uf data over to device uf
     cu_union_find* dev_uf;
-    cudaMalloc(&dev_uf, sizeof(cu_union_find));
-    cudaMemcpy(dev_uf, &host_uf, sizeof(cu_union_find), cudaMemcpyHostToDevice);
+    CUDA_CHECK(cudaMalloc(&dev_uf, sizeof(cu_union_find)));
+    CUDA_CHECK(cudaMemcpy(dev_uf, &host_uf, sizeof(cu_union_find), cudaMemcpyHostToDevice));
 
     // Cleanup and return
     delete[] host_h;
     delete[] host_p; 
     return dev_uf;
+}
+
+void cu_uf_destruct(cu_union_find* d_uf) {
+    // Copy to host to access p/h pointers
+    cu_union_find h_uf;
+    CUDA_CHECK(cudaMemcpy(&h_uf, d_uf, sizeof(cu_union_find), cudaMemcpyDeviceToHost));
+
+    // Free device arrays
+    CUDA_CHECK(cudaFree(h_uf.h));
+    CUDA_CHECK(cudaFree(h_uf.p));
+
+    // Free device uf struct
+    CUDA_CHECK(cudaFree(d_uf));
 }
 
 __device__ int __cu_uf_find(cu_union_find* UF, int x) {
@@ -84,22 +97,22 @@ __device__ void __cu_uf_join(cu_union_find* UF, int x, int y) {
             return;
         }
         
+        // Get sizes
+        uint32_t px_size = atomicAdd(&UF->h[px], 0);
+        uint32_t py_size = atomicAdd(&UF->h[py], 0);
+
         // Join logic, favor x's parent as root in tiebreaker; favor lower index as root
-        if(px < py) {
+        if(px_size >= py_size) {
             if(atomicCAS(&UF->p[py], py, px) == py) {
-                // Equal height
-                if(UF->h[px] == UF->h[py]) {
-                    atomicAdd(&UF->h[px], 1);
-                }
-                return;
+                // Linked py -> px, h[px] += h[py]
+                atomicAdd(&UF->h[px], py_size);
+                break;
             }
         } else {
             if(atomicCAS(&UF->p[px], px, py) == px) {
-                // Equal height
-                if(UF->h[px] == UF->h[py]) {
-                    atomicAdd(&UF->h[py], 1);
-                }
-                return;
+                // Linked px -> py, h[py] += h[px]
+                atomicAdd(&UF->h[py], px_size);
+                break;
             }
         }
 
