@@ -4,6 +4,8 @@ std::vector<fq_read*> cu_filter_fq(const std::vector<fq_read*>& READS, char FILT
     // Size variables
     int READ_LEN = READS.size();
     int FILTER_LENGTH = (READ_LEN / 64) + 1;
+    int THREADS = MAX_THREADS;
+    int BLOCKS = (READ_LEN / THREADS) + 1;
     
     // Host variables
     std::string temp = "";
@@ -31,8 +33,6 @@ std::vector<fq_read*> cu_filter_fq(const std::vector<fq_read*>& READS, char FILT
     CUDA_CHECK(cudaMemcpy(d_offsets, h_offsets.data(), sizeof(uint32_t) * READ_LEN, cudaMemcpyHostToDevice));
 
     // Run kernels
-    int THREADS = MAX_THREADS;
-    int BLOCKS = (READ_LEN / THREADS) + 1;
     if(FILTER_MODE == SLIDING_WINDOW) {
         cu_filter_reads_sw <<<BLOCKS, THREADS>>> (
             d_allseq, 
@@ -124,6 +124,8 @@ std::unordered_map<uint64_t, uint64_t> cu_count_kmers(const std::vector<fq_read*
     // Size variables 
     int READ_LEN = READS.size(); 
     uint64_t MAP_SIZE = (1ULL << (2 * K)) * 2;
+    int THREADS = MAX_THREADS;
+    int BLOCKS = (READ_LEN / THREADS) + 1;
     
     // Host variables
     std::string temp = "";
@@ -149,8 +151,6 @@ std::unordered_map<uint64_t, uint64_t> cu_count_kmers(const std::vector<fq_read*
     CUDA_CHECK(cudaMemcpy(d_offsets, h_offsets.data(), sizeof(uint32_t) * READ_LEN, cudaMemcpyHostToDevice));
 
     // Run kernel
-    int THREADS = MAX_THREADS;
-    int BLOCKS = (READ_LEN / THREADS) + 1;
     cu_kmer_count <<<BLOCKS, THREADS>>> (
         d_map, 
         d_allseq, 
@@ -169,6 +169,7 @@ std::unordered_map<uint64_t, uint64_t> cu_count_kmers(const std::vector<fq_read*
 
     // Format data
     std::unordered_map<uint64_t, uint64_t> ret;
+    ret.reserve(MAP_SIZE / 8);
     for(int i = 0; i < MAP_SIZE; ++i) {
         if(h_map[i].key == EMPTY) {
             continue;
@@ -184,5 +185,80 @@ std::unordered_map<uint64_t, uint64_t> cu_count_kmers(const std::vector<fq_read*
 }
 
 std::unordered_map<uint64_t, std::unordered_set<int>> cu_index_kmers(const std::vector<fq_read*>& READS, size_t K) {
+    /*
+     *  Given: 130 * 8 = 1040 bytes per kh_pair, MAP_SIZE = 2 * total kmers, total bytes = 4^k * 2 * 1040
+     *  k = 10 requires 2.18B bytes = 2gb vram/normal ram
+     *  My GPU has 8gb vram...
+     *  Note to self: consider setting K_MAX as 10 or 11
+     *  -> Map needs size to be 2x the number of elements it's holding for better nocollide
+     */
+    if(K > 10) {
+        throw std::runtime_error("K is too large, possible memory issues.");
+    }
+
+    // Size variables
+    int READ_LEN = READS.size(); 
+    uint64_t MAP_SIZE = (1ULL << (2 * K)) * 2;
+    int THREADS = MAX_THREADS;
+    int BLOCKS = (READ_LEN / THREADS) + 1;
+
+    // Host variables
+    std::string temp = "";
+    std::vector<uint32_t> h_offsets(READ_LEN);
+    for(int i = 0; i < READ_LEN; ++i) {
+        temp += READS[i]->get_seq();
+        h_offsets[i] = temp.size() - 1;
+    }
+    int SEQ_LEN = temp.size() + 1;                  // temp + '\0'
+    const char* h_allseq = temp.c_str();
     
+    // Device variables
+    char* d_allseq;
+    uint32_t* d_offsets;
+    kh_pair<uint32_t[MAP_MAX_INDICES + 1]>* d_map = kh_construct<uint32_t[MAP_MAX_INDICES + 1]>(MAP_SIZE);
+
+    // Allocate mem for device variables
+    CUDA_CHECK(cudaMalloc(&d_allseq, sizeof(char) * SEQ_LEN));
+    CUDA_CHECK(cudaMalloc(&d_offsets, sizeof(uint32_t) * READ_LEN));
+
+    // Copy mem host -> device
+    CUDA_CHECK(cudaMemcpy(d_allseq, h_allseq, sizeof(char) * SEQ_LEN, cudaMemcpyHostToDevice));
+    CUDA_CHECK(cudaMemcpy(d_offsets, h_offsets.data(), sizeof(uint32_t) * READ_LEN, cudaMemcpyHostToDevice));
+
+    // Run kernel
+    cu_kmer_index <<<BLOCKS, THREADS>>> (
+        d_map,
+        d_allseq,
+        d_offsets,
+        K,
+        READ_LEN,
+        MAP_SIZE
+    );
+
+    // Sync
+    CUDA_CHECK(cudaDeviceSynchronize());
+
+    // Copy mem back
+    std::vector<kh_pair<uint32_t[MAP_MAX_INDICES + 1]>> h_map(MAP_SIZE);
+    CUDA_CHECK(cudaMemcpy(h_map.data(), d_map, sizeof(kh_pair<uint32_t[MAP_MAX_INDICES + 1]>) * MAP_SIZE, cudaMemcpyDeviceToHost));
+
+    // Format data, reserve space
+    std::unordered_map<uint64_t, std::unordered_set<int>> ret;
+    ret.reserve(MAP_SIZE / 4);
+    for(int i = 0; i < MAP_SIZE; ++i) {
+        if(h_map[i].key == EMPTY) {
+            continue;
+        }
+
+        // Insert up until MAP_MAX_INDICES matching indices
+        for(int j = 1; j <= h_map[i].value[0]; ++j) {
+            ret[h_map[i].key].insert(h_map[i].value[j]);
+        }
+    }
+
+    // Clean and return
+    CUDA_CHECK(cudaFree(d_allseq));
+    CUDA_CHECK(cudaFree(d_offsets));
+    CUDA_CHECK(cudaFree(d_map));
+    return ret;
 }
