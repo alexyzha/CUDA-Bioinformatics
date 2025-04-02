@@ -18,7 +18,7 @@ __global__ void cu_filter_reads(
     char FILTER_MODE,
     char THRESH,
     uint64_t* FILTER_MASK,
-    double PROPORTION = 0.0
+    double PROPORTION
 );
 
 /*
@@ -37,5 +37,5 @@ __global__ void cu_filter_reads_sw(
     size_t LEN,
     size_t K,
     char THRESH,
-    double PROPORTION = 0.5
+    double PROPORTION
 );

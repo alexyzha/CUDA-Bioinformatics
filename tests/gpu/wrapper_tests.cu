@@ -1,4 +1,4 @@
-#include "headers/test_util.cuh"
+#include "headers/test_util.h"
 #include "headers/global_wrappers.cuh"
 #include "headers/test_prototypes.cuh"
 #include "../../cpu/headers/fx_util.h"
@@ -150,7 +150,7 @@ void CU_WRAPPER_TESTS(std::vector<TEST_RESULT*>& RESULTS) {
         std::vector<fq_read*> ret = cu_filter_fq(reads, SLIDING_WINDOW, THRESH, 5, 0.0);
 
         // Check results
-        EXPECT_EQ(ret.size(), 3);
+        EXPECT_EQ(ret.size(), static_cast<size_t>(3));
         for(int i = 0; i < 3; ++i) {
             EXPECT_EQ(ret[i]->get_seq(), exp_seq[i]);
             EXPECT_EQ(ret[i]->get_quality(), exp_qual[i]);
@@ -187,8 +187,8 @@ void CU_WRAPPER_TESTS(std::vector<TEST_RESULT*>& RESULTS) {
         std::vector<fq_read*> ret = cu_filter_fq(reads, PROPORTION_DISCARD_WHOLE, THRESH, 0, 0.5);
 
         // Check results
-        EXPECT_EQ(ret.size(), 1);
-        EXPECT_EQ(ret[0]->get_id(), "1");
+        EXPECT_EQ(ret.size(), static_cast<size_t>(1));
+        EXPECT_EQ(ret[0]->get_id(), std::string("1"));
 
         // Clean
         for(auto& read : reads) {
@@ -290,17 +290,17 @@ void CU_WRAPPER_TESTS(std::vector<TEST_RESULT*>& RESULTS) {
         std::vector<std::unordered_set<int>*> ret = cu_cluster_by_kmer(reads, 2, 2);
 
         // Check results
-        EXPECT_NE([&]() {
+        EXPECT_FALSE([&]() {
             return ret[0] ? ret[0] : ret[4];
-        }(), nullptr);
+        }() == nullptr);
         for(int i = 1; i <= 3; ++i) {
-            EXPECT_EQ(ret[i], nullptr);
+            EXPECT_TRUE(ret[i] == nullptr);
         }
         if(ret[0]) {
-            EXPECT_EQ(ret[0]->size(), 1);
+            EXPECT_EQ(ret[0]->size(), static_cast<size_t>(1));
             EXPECT_TRUE(ret[0]->count(4));
         } else if(ret[4]) {
-            EXPECT_EQ(ret[4]->size(), 1);
+            EXPECT_EQ(ret[4]->size(), static_cast<size_t>(1));
             EXPECT_TRUE(ret[4]->count(0));
         }
 
@@ -351,7 +351,7 @@ void CU_WRAPPER_TESTS(std::vector<TEST_RESULT*>& RESULTS) {
         // Check results
         EXPECT_EQ(ret.size(), reads.size());
         for(int i = 0; i < ret.size(); ++i) {
-            EXPECT_EQ(ret[i]->cigar, exp_cig[i]);
+            EXPECT_EQ(*ret[i]->cigar, exp_cig[i]);
             EXPECT_EQ(ret[i]->end_ref, exp_nums[i][0]);
             EXPECT_EQ(ret[i]->end_read, exp_nums[i][1]);
             EXPECT_EQ(ret[i]->score, exp_nums[i][2]);

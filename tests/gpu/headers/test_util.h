@@ -9,12 +9,14 @@
 #include <unordered_map>
 #include <utility>
 #include <vector>
+#ifdef __CUDACC__
 #include "../../src/gpu/headers/fq_filter.cuh"
 #include "../../src/gpu/headers/kmer_util.cuh"
 #include "../../src/gpu/headers/local_alignment.cuh"
 #include "../../src/gpu/headers/util_structs.cuh"
 #include "../../src/gpu/headers/util.cuh"
 #include "../../src/gpu/headers/wrappers.cuh"
+#endif
 
 #ifndef ANSI_ESC_COMMON
 #define ANSI_ESC_COMMON
@@ -84,7 +86,7 @@ TEST_RESULT* TEST(std::string TEST_SUITE, std::string TEST_NAME, T TEST_FXN) {
         
         // Take end time, return
         auto END = std::chrono::high_resolution_clock::now();
-        int TIME_TAKEN = duration_cast<milliseconds>(END - START).count();
+        int TIME_TAKEN = std::chrono::duration_cast<std::chrono::milliseconds>(END - START).count();
         return new TEST_RESULT{TEST_SUITE, TEST_NAME, true, TIME_TAKEN};
     } catch(const std::exception& e) {
         // Print error message
@@ -95,7 +97,7 @@ TEST_RESULT* TEST(std::string TEST_SUITE, std::string TEST_NAME, T TEST_FXN) {
 
         // Take end time, return
         auto END = std::chrono::high_resolution_clock::now();
-        int TIME_TAKEN = duration_cast<milliseconds>(END - START).count();
+        int TIME_TAKEN = std::chrono::duration_cast<std::chrono::milliseconds>(END - START).count();
         return new TEST_RESULT{TEST_SUITE, TEST_NAME, false, TIME_TAKEN};
     } catch(...) {
         // Print error message
@@ -106,25 +108,25 @@ TEST_RESULT* TEST(std::string TEST_SUITE, std::string TEST_NAME, T TEST_FXN) {
 
         // Take end time, return
         auto END = std::chrono::high_resolution_clock::now();
-        int TIME_TAKEN = duration_cast<milliseconds>(END - START).count();
+        int TIME_TAKEN = std::chrono::duration_cast<std::chrono::milliseconds>(END - START).count();
         return new TEST_RESULT{TEST_SUITE, TEST_NAME, false, TIME_TAKEN};
     }
 }
 
-template<typename T, typename U>
-void EXPECT_EQ(const T& EXP, const U& ACT) {
+template<typename T>
+void EXPECT_EQ(T EXP, T ACT) {
     if(!(EXP == ACT)) {
         std::ostringstream oss;
-        oss << "EXPECT_EQ failed\nExpected: " << EXP << "\nActual: " << ACT;
+        oss << "EXPECT_EQ failed";
         throw std::runtime_error(oss.str());
     }
 }
 
-template<typename T, typename U>
-void EXPECT_NE(const T& EXP, const U& ACT) {
+template<typename T>
+void EXPECT_NE(T EXP, T ACT) {
     if(EXP == ACT) {
         std::ostringstream oss;
-        oss << "EXPECT_NE failed\nExpected not equal to: " << EXP << "\nActual: " << ACT;
+        oss << "EXPECT_NE failed";
         throw std::runtime_error(oss.str());
     }
 }
@@ -133,11 +135,11 @@ inline void EXPECT_TRUE(bool ACT);
 
 inline void EXPECT_FALSE(bool ACT);
 
-template<typename T, typename U, typename V>
-void EXPECT_NEAR(const T& EXP, const U& ACT, V THRESH) {
+template<typename T>
+void EXPECT_NEAR(T EXP, T ACT, T THRESH) {
     if(std::abs(EXP - ACT) > THRESH) {
         std::ostringstream oss;
-        oss << "EXPECT_NEAR failed\nExpected difference <= " << THRESH << "\nActual difference: " << std::abs(EXP - ACT);
+        oss << "EXPECT_NEAR failed";
         throw std::runtime_error(oss.str());
     }
 }

@@ -1,4 +1,5 @@
-#include "test_util.cuh"
+#define __CUDACC__
+#include "test_util.h"
 #include "global_wrappers.cuh"
 
 void CU_UTIL_TESTS(std::vector<TEST_RESULT*>& RESULTS);

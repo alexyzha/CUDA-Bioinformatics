@@ -1,4 +1,4 @@
-#include "headers/test_util.cuh"
+#include "headers/test_util.h"
 
 #ifdef C_V_UF
 
@@ -42,16 +42,12 @@ bool v_union_find::con(int x, int y) {
 
 inline void EXPECT_TRUE(bool ACT) {
     if(!ACT) {
-        throw std::runtime_error("EXPECT_TRUE failed\nExpected: true\nActual: false");
+        throw std::runtime_error("EXPECT_TRUE failed");
     }
 }
 
 inline void EXPECT_FALSE(bool ACT) {
     if(ACT) {
-        throw std::runtime_error("EXPECT_FALSE failed\nExpected: false\nActual: true");
+        throw std::runtime_error("EXPECT_FALSE failed");
     }
-}
-
-inline char gen_base() {
-    int b = rand() % 4;
 }

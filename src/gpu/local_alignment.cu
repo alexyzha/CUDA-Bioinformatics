@@ -78,9 +78,8 @@ __global__ void cu_local_alignment(char* ALL_SEQ, char* CIGAR_BUF, int* CACHE, u
             ++count;
         } else {
             if(count) {
-                cigar_iter += sprintf(
+                cigar_iter += __reverse_to_cigar(
                     cigar + cigar_iter, 
-                    "%d%c",
                     count,
                     prev 
                 );
@@ -92,9 +91,8 @@ __global__ void cu_local_alignment(char* ALL_SEQ, char* CIGAR_BUF, int* CACHE, u
 
     // Check for leftovers
     if(count) {
-        cigar_iter += sprintf(
+        cigar_iter += __reverse_to_cigar(
             cigar + cigar_iter, 
-            "%d%c",
             count,
             prev 
         );
@@ -190,9 +188,8 @@ __global__ void cu_fq_local_alignment(char* REF, cu_fq_read* READS, char* CIGAR_
             ++count;
         } else {
             if(count) {
-                cigar_iter += sprintf(
-                    cigar + cigar_iter, 
-                    "%d%c",
+                cigar_iter += __reverse_to_cigar(
+                    cigar + cigar_iter,
                     count,
                     prev 
                 );
@@ -204,9 +201,8 @@ __global__ void cu_fq_local_alignment(char* REF, cu_fq_read* READS, char* CIGAR_
 
     // Check for leftovers
     if(count) {
-        cigar_iter += sprintf(
+        cigar_iter += __reverse_to_cigar(
             cigar + cigar_iter, 
-            "%d%c",
             count,
             prev 
         );

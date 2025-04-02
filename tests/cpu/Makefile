@@ -4,14 +4,14 @@
 ##         CAN AUTO RUN IN GA         ##
 ########################################
 
-CXX = g++
-CXXFLAGS = -std=c++17 -I../../src -I../../src/cpu -Wno-trigraphs
-WARNINGS = -Wall -Wextra
-LDFLAGS = -lgtest -lgtest_main -pthread
-SRC_DIR = ../../src
-CPU_DIR = ../../src/cpu
-OBJ_DIR = ./obj
-TEST_DIR = .
+CXX 	 	= g++
+CXXFLAGS 	= -std=c++17 -I../../src -I../../src/cpu -Wno-trigraphs
+WARNINGS 	= -Wall -Wextra
+LDFLAGS  	= -lgtest -lgtest_main -pthread
+SRC_DIR  	= ../../src
+CPU_DIR  	= ../../src/cpu
+OBJ_DIR  	= ./obj
+TEST_DIR 	= .
 
 $(shell mkdir -p $(OBJ_DIR))
 

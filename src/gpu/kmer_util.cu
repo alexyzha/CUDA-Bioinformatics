@@ -26,7 +26,7 @@ __global__ void cu_kmer_count(kh_pair<uint64_t>* MAP, char* ALL_SEQ, uint32_t* O
         // From index SEQ_BEGIN to SEQ_BEGIN + K - 1, hash is not yet a full kmer
         if(i >= K - 1) {
             // Get hash
-            uint64_t index = __kh_hash(hash) % MAP_LEN;
+            uint64_t index = __kh_hash(hash & mask) % MAP_LEN;
 
             // Linear probing
             for(int i = 0; i < MAP_LEN; ++i) {
@@ -74,7 +74,7 @@ __global__ void cu_kmer_index(kh_pair<uint32_t[MAP_MAX_INDICES + 1]>* MAP, char*
         // From index SEQ_BEGIN to SEQ_BEGIN + K - 1, hash is not yet a full kmer
         if(i >= K - 1) {
             // Get hash
-            uint64_t index = __kh_hash(hash) % MAP_LEN;
+            uint64_t index = __kh_hash(hash & mask) % MAP_LEN;
 
             // Linear probing
             for(int i = 0; i < MAP_LEN; ++i) {

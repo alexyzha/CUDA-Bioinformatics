@@ -1,5 +1,4 @@
 #pragma once
-#pragma once
 #include <algorithm>
 #include <cctype>
 #include <cstdint>
@@ -62,6 +61,8 @@
     } while(0)
 #endif
 
-__device__ int __max(int a, int b);
+__device__ __forceinline__ int __max(int a, int b);
 
-__device__ char __base_to_bit(char base);
+__device__ __forceinline__ char __base_to_bit(char base);
+
+__device__ __forceinline__ int __reverse_to_cigar(char* str, int count, char op);

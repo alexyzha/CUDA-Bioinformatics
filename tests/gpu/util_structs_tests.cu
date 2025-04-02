@@ -119,7 +119,7 @@ void CU_UTIL_STRUCTS_TESTS(std::vector<TEST_RESULT*>& RESULTS) {
         std::vector<uint32_t> h_roots(NODES);
         CUDA_CHECK(cudaMemcpy(h_roots.data(), d_roots, sizeof(uint32_t) * NODES, cudaMemcpyDeviceToHost));
         for(int i = 0; i < NODES; ++i) {
-            EXPECT_EQ(h_roots[i], val_uf.find(h_indexlist[i]));
+            EXPECT_EQ(h_roots[i], static_cast<uint32_t>(val_uf.find(h_indexlist[i])));
         }
 
         // Clean up
@@ -177,7 +177,7 @@ void CU_UTIL_STRUCTS_TESTS(std::vector<TEST_RESULT*>& RESULTS) {
         for(int i = 0; i < NODES; ++i) {
             int first = h_edgelist[i * 2];
             int second = h_edgelist[i * 2 + 1];
-            EXPECT_EQ(h_ret[i], val_uf.con(first, second));
+            EXPECT_EQ(static_cast<bool>(h_ret[i]), val_uf.con(first, second));
         }
 
         // Clean up
