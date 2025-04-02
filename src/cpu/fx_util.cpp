@@ -18,13 +18,13 @@ std::vector<fq_read*> filter_fq(const std::vector<fq_read*>& reads, char FILTER_
             case AVERAGE_DISCARD_WHOLE: {
                 double average = static_cast<double>(sum(read->get_quality(), 0)) / read->size();
                 if(average >= static_cast<double>(THRESH)) {
-                    filtered_reads.push_back(
-                        new fq_read(read->get_id(),
-                                    read->size(),
-                                    read->get_seq(),
-                                    read->get_quality(),
-                                    read->get_metadata())
-                    );
+                    filtered_reads.push_back(new fq_read(
+                        read->get_id(),            
+                        read->size(),
+                        read->get_seq(),
+                        read->get_quality(),
+                        read->get_metadata()
+                    ));
                 }
                 break;
             }
@@ -40,13 +40,13 @@ std::vector<fq_read*> filter_fq(const std::vector<fq_read*>& reads, char FILTER_
                     }
                 }
                 if(!discard) {
-                    filtered_reads.push_back(
-                        new fq_read(read->get_id(),
-                                    read->size(),
-                                    read->get_seq(),
-                                    read->get_quality(),
-                                    read->get_metadata())
-                    );
+                    filtered_reads.push_back(new fq_read(
+                        read->get_id(),
+                        read->size(),
+                        read->get_seq(),
+                        read->get_quality(),
+                        read->get_metadata()
+                    ));
                 }
                 break;
             }
@@ -79,13 +79,13 @@ std::vector<fq_read*> filter_fq(const std::vector<fq_read*>& reads, char FILTER_
 
                 // Trim and push new read
                 if(trim_index) {
-                    filtered_reads.push_back(
-                        new fq_read(read->get_id(),
-                                    trim_index,
-                                    read->get_seq().substr(0, trim_index),
-                                    read->get_quality().substr(0, trim_index),
-                                    read->get_metadata())
-                    );
+                    filtered_reads.push_back(new fq_read(
+                        read->get_id(),
+                        trim_index,
+                        read->get_seq().substr(0, trim_index),
+                        read->get_quality().substr(0, trim_index),
+                        read->get_metadata()
+                    ));
                 }
                 break;
             }
@@ -100,13 +100,13 @@ std::vector<fq_read*> filter_fq(const std::vector<fq_read*>& reads, char FILTER_
                     }
                 }
                 if(static_cast<double>(ct) / read->size() >= PERC) {
-                    filtered_reads.push_back(
-                        new fq_read(read->get_id(),
-                                    read->size(),
-                                    read->get_seq(),
-                                    read->get_quality(),
-                                    read->get_metadata())
-                    );
+                    filtered_reads.push_back(new fq_read(
+                        read->get_id(),
+                        read->size(),
+                        read->get_seq(),
+                        read->get_quality(),
+                        read->get_metadata()
+                    ));
                 }
                 break;
             }

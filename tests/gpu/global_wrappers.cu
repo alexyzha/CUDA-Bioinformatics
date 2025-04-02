@@ -1,4 +1,4 @@
-#include "headers/test_wrappers.cuh"
+#include "headers/global_wrappers.cuh"
 
 __global__ void cu_max(int a, int b, int* out) {
     *out = __max(a, b);

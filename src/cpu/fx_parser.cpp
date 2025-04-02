@@ -27,12 +27,12 @@ std::vector<fa_read*> read_fasta(std::string file_path) {
         // Check if current line is the start of a new read section
         if(cur_line[0] == '>') {
             if(!cur_seq.empty()) {
-                reads.push_back(
-                    new fa_read(cur_id,
-                                cur_seq.size(),
-                                cur_seq,
-                                cur_meta)
-                );
+                reads.push_back(new fa_read(
+                    cur_id,
+                    cur_seq.size(),
+                    cur_seq,
+                    cur_meta
+                ));
             }
             cur_seq.clear();                                                
             std::vector<std::string> header = split_by(cur_line, ' ');
@@ -47,12 +47,12 @@ std::vector<fa_read*> read_fasta(std::string file_path) {
 
     // FASTA will never end with a header section, therefore we need push the last read
     if(!cur_seq.empty()) {
-        reads.push_back(
-            new fa_read(cur_id,
-                        cur_seq.size(),
-                        cur_seq,
-                        cur_meta)
-        );
+        reads.push_back(new fa_read(
+            cur_id,
+            cur_seq.size(),
+            cur_seq,
+            cur_meta
+        ));
     }
     file.close();
     return reads;
@@ -91,13 +91,13 @@ std::vector<fq_read*> read_fastq(std::string file_path) {
             case 0: {
                 // First block being read case
                 if(!cur_seq.empty()) {
-                    reads.push_back(
-                        new fq_read(cur_id,
-                                    cur_seq.size(),
-                                    cur_seq,
-                                    cur_qual,
-                                    cur_meta)
-                    );
+                    reads.push_back(new fq_read(
+                        cur_id,
+                        cur_seq.size(),
+                        cur_seq,
+                        cur_qual,
+                        cur_meta
+                    ));
                 }
                 cur_seq.clear();
                 if(cur_line.empty()) {                                          // Last line of a FASTQ file could be empty
@@ -137,13 +137,13 @@ std::vector<fq_read*> read_fastq(std::string file_path) {
 
     // Since fastq files don't end with a header, need to push last read manually
     if(!cur_seq.empty()) {
-        reads.push_back(
-            new fq_read(cur_id,
-                        cur_seq.size(),
-                        cur_seq,
-                        cur_qual,
-                        cur_meta)
-        );
+        reads.push_back(new fq_read(
+            cur_id,
+            cur_seq.size(),
+            cur_seq,
+            cur_qual,
+            cur_meta
+        ));
     }
     file.close();
     return reads;

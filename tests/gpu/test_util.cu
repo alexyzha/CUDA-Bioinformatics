@@ -51,3 +51,7 @@ inline void EXPECT_FALSE(bool ACT) {
         throw std::runtime_error("EXPECT_FALSE failed\nExpected: false\nActual: true");
     }
 }
+
+inline char gen_base() {
+    int b = rand() % 4;
+}

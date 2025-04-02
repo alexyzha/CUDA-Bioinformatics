@@ -128,8 +128,8 @@ TEST(FX_UTIL, COUNT_KMER_UNDER_LENGTH) {
     std::vector<fq_read*> reads;
     std::unordered_map<uint64_t, uint64_t> res;
     for(int i = 0; i < 5; ++i) {
-        reads.push_back(
-            new fq_read("ID" + std::to_string(i),
+        reads.push_back(new fq_read(
+            "ID" + std::to_string(i),
             4,
             [&]() {
                 std::string ret = "";
@@ -138,9 +138,8 @@ TEST(FX_UTIL, COUNT_KMER_UNDER_LENGTH) {
                 }
                 return ret;
             }(),
-            "????",
-            "")
-        );
+            "????"
+        ));
     }
 
     // Function being tested
@@ -179,13 +178,12 @@ TEST(FX_UTIL, COUNT_KMER_NORMAL_1) {
     };
     std::unordered_map<uint64_t, uint64_t> res;
     for(int i = 0; i < 5; ++i) {
-        reads.push_back(
-            new fq_read("ID" + std::to_string(i),
+        reads.push_back(new fq_read(
+            "ID" + std::to_string(i),
             3,
             seqs[i],
-            "???",
-            "")
-        );
+            "???"    
+        ));
     }
 
     // Function being tested
@@ -211,13 +209,12 @@ TEST(FX_UTIL, COUNT_KMER_NORMAL_2) {
     };
     std::unordered_map<uint64_t, uint64_t> res;
     for(int i = 0; i < 5; ++i) {
-        reads.push_back(
-            new fq_read("ID" + std::to_string(i),
+        reads.push_back(new fq_read(
+            "ID" + std::to_string(i),
             3,
             seqs[i],
-            "???",
-            "")
-        );
+            "???"
+        ));
     }
 
     // Function being tested
@@ -236,8 +233,8 @@ TEST(FX_UTIL, INDEX_KMER_UNDER_LENGTH) {
     std::vector<fq_read*> reads;
     std::unordered_map<uint64_t, std::unordered_set<int>> res;
     for(int i = 0; i < 5; ++i) {
-        reads.push_back(
-            new fq_read("ID" + std::to_string(i),
+        reads.push_back(new fq_read(
+            "ID" + std::to_string(i),
             4,
             [&]() {
                 std::string ret = "";
@@ -246,9 +243,8 @@ TEST(FX_UTIL, INDEX_KMER_UNDER_LENGTH) {
                 }
                 return ret;
             }(),
-            "????",
-            "")
-        );
+            "????"
+        ));
     }
 
     // Function being tested
@@ -287,13 +283,12 @@ TEST(FX_UTIL, INDEX_KMER_NORMAL_1) {
     };
     std::unordered_map<uint64_t, std::unordered_set<int>> res;
     for(int i = 0; i < 5; ++i) {
-        reads.push_back(
-            new fq_read("ID" + std::to_string(i),
+        reads.push_back(new fq_read(
+            "ID" + std::to_string(i),
             3,
             seqs[i],
-            "???",
-            "")
-        );
+            "???"
+        ));
     }
     
     // Function being tested
@@ -322,13 +317,12 @@ TEST(FX_UTIL, INDEX_KMER_NORMAL_2) {
     };
     std::unordered_map<uint64_t, std::unordered_set<int>> res;
     for(int i = 0; i < 5; ++i) {
-        reads.push_back(
-            new fq_read("ID" + std::to_string(i),
+        reads.push_back(new fq_read(
+            "ID" + std::to_string(i),
             3,
             seqs[i],
-            "???",
-            "")
-        );
+            "???"
+        ));
     }
 
     // Function being tested
@@ -466,13 +460,12 @@ TEST(FX_UTIL, CLUSTER_BY_KMER) {
     };
     std::unordered_map<uint64_t, std::unordered_set<int>> kmer_map;
     for(int i = 0; i < 5; ++i) {
-        reads.push_back(
-            new fq_read("ID" + std::to_string(i),
+        reads.push_back(new fq_read(
+            "ID" + std::to_string(i),
             3,
             seqs[i],
-            "???",
-            "")
-        );
+            "???"
+        ));
     }
     kmer_map = index_kmer(reads, 2);
 

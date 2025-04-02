@@ -1,6 +1,7 @@
 #include "headers/test_prototypes.cuh"
 
 void CU_UTIL_TESTS(std::vector<TEST_RESULT*>& RESULTS) {
+    srand(0x56709AAE);
 
     // Simple __max test
     RESULTS.push_back(TEST("CU_UTIL", "MAX_A<B", [](){

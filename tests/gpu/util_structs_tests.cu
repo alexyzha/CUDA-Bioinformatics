@@ -1,6 +1,7 @@
 #include "headers/test_prototypes.cuh"
 
 void CU_UTIL_STRUCTS_TESTS(std::vector<TEST_RESULT*>& RESULTS) {
+    srand(0x1EE7B00F);
 
     // Kmer hashtable constuctor test basic
     RESULTS.push_back(TEST("CU_UTIL_STRUCTS", "KMER_HASHTABLE_CONSTRUCTOR_BASIC", [](){
