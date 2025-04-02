@@ -1,10 +1,10 @@
 #include "headers/util.cuh"
 
-__device__ __forceinline__ int __max(int a, int b) {
+__device__ int __max(int a, int b) {
     return a > b ? a : b;
 }
 
-__device__ __forceinline__ char __base_to_bit(char base) {
+__device__ char __base_to_bit(char base) {
     switch(base) {
         case 'A':
             return 0b00;
@@ -20,7 +20,7 @@ __device__ __forceinline__ char __base_to_bit(char base) {
     return -1;
 }
 
-__device__ __forceinline__ int __reverse_to_cigar(char* str, int count, char op) {
+__device__ int __reverse_to_cigar(char* str, int count, char op) {
     int i = 1;
     int temp = count;
 

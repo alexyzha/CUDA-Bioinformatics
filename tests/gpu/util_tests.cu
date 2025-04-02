@@ -53,9 +53,9 @@ void CU_UTIL_TESTS(std::vector<TEST_RESULT*>& RESULTS) {
         CUDA_CHECK(cudaDeviceSynchronize());
 
         // Check results
-        std::vector<char> h_ret;
-        CUDA_CHECK(cudaMemcpy(h_ret.data(), d_ret, sizeof(char), cudaMemcpyDeviceToHost));
-        for(unsigned char i = 0; i <= 255; ++i) {
+        std::vector<char> h_ret(255);
+        CUDA_CHECK(cudaMemcpy(h_ret.data(), d_ret, sizeof(char) * 255, cudaMemcpyDeviceToHost));
+        for(unsigned char i = 0; i < 255; ++i) {
             switch(i) {
                 case 'A':
                     EXPECT_EQ(h_ret[i], static_cast<char>(0b00));

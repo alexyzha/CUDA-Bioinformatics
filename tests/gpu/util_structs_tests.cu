@@ -44,8 +44,11 @@ void CU_UTIL_STRUCTS_TESTS(std::vector<TEST_RESULT*>& RESULTS) {
         // Create test variables
         uint64_t* d_key;
         uint64_t* d_value;
-        std::vector<uint64_t> h_key(1024, rand());
-        auto validate_hash = [](int key, int hash) -> bool {
+        std::vector<uint64_t> h_key(1024);
+        for(auto& i : h_key) {
+            i = static_cast<uint64_t>(rand()) ^ (static_cast<uint64_t>(rand()) << 32);
+        }
+        auto validate_hash = [](uint64_t key, uint64_t hash) -> bool {
             key = (~key) + (key << 21);
             key = key ^ (key >> 24);
             key = (key + (key << 3)) + (key << 8);

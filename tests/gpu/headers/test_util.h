@@ -77,6 +77,8 @@ public:
 
 template<typename T>
 TEST_RESULT* TEST(std::string TEST_SUITE, std::string TEST_NAME, T TEST_FXN) {
+    std::cout << GREEN << "--> " << TEST_SUITE << '.' << TEST_NAME << RESET << std::endl; 
+
     // Take start time
     auto START = std::chrono::high_resolution_clock::now();
 
@@ -131,9 +133,9 @@ void EXPECT_NE(T EXP, T ACT) {
     }
 }
 
-inline void EXPECT_TRUE(bool ACT);
+void EXPECT_TRUE(bool ACT);
 
-inline void EXPECT_FALSE(bool ACT);
+void EXPECT_FALSE(bool ACT);
 
 template<typename T>
 void EXPECT_NEAR(T EXP, T ACT, T THRESH) {

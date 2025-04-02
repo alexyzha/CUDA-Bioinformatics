@@ -40,13 +40,13 @@ bool v_union_find::con(int x, int y) {
 
 #endif
 
-inline void EXPECT_TRUE(bool ACT) {
+void EXPECT_TRUE(bool ACT) {
     if(!ACT) {
         throw std::runtime_error("EXPECT_TRUE failed");
     }
 }
 
-inline void EXPECT_FALSE(bool ACT) {
+void EXPECT_FALSE(bool ACT) {
     if(ACT) {
         throw std::runtime_error("EXPECT_FALSE failed");
     }

@@ -61,8 +61,17 @@
     } while(0)
 #endif
 
-__device__ __forceinline__ int __max(int a, int b);
+/*
+ *  Device side max convenience function
+ */
+__device__ int __max(int a, int b);
 
-__device__ __forceinline__ char __base_to_bit(char base);
+/*
+ *  Converts bases ACGT to 2-bit bitmask
+ */
+__device__ char __base_to_bit(char base);
 
-__device__ __forceinline__ int __reverse_to_cigar(char* str, int count, char op);
+/*
+ *  Case-specific function for adding to the end of a cigar string
+ */
+__device__ int __reverse_to_cigar(char* str, int count, char op);
