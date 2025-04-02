@@ -3,7 +3,7 @@
 void CU_UTIL_TESTS(std::vector<TEST_RESULT*>& RESULTS) {
 
     // Simple __max test
-    RESULTS.push_back(new TEST("CU_UTIL", "MAX_A<B", [](){
+    RESULTS.push_back(TEST("CU_UTIL", "MAX_A<B", [](){
         // Device vars
         int* d_ret;
         CUDA_CHECK(cudaMalloc(&d_ret, sizeof(int)));
@@ -22,7 +22,7 @@ void CU_UTIL_TESTS(std::vector<TEST_RESULT*>& RESULTS) {
     }));
 
     // Simple __max test
-    RESULTS.push_back(new TEST("CU_UTIL", "MAX_A>B", [](){
+    RESULTS.push_back(TEST("CU_UTIL", "MAX_A>B", [](){
         // Device vars
         int* d_ret;
         CUDA_CHECK(cudaMalloc(&d_ret, sizeof(int)));
@@ -41,7 +41,7 @@ void CU_UTIL_TESTS(std::vector<TEST_RESULT*>& RESULTS) {
     }));
 
     // Test output for __base_to_bit given all chars
-    RESULTS.push_back(new TEST("CU_UTIL", "BASE_TO_BIT_ALL", [](){
+    RESULTS.push_back(TEST("CU_UTIL", "BASE_TO_BIT_ALL", [](){
         // Device vars
         char* d_ret;
         CUDA_CHECK(cudaMalloc(&d_ret, sizeof(char) * 255));
@@ -55,21 +55,21 @@ void CU_UTIL_TESTS(std::vector<TEST_RESULT*>& RESULTS) {
         std::vector<char> h_ret;
         CUDA_CHECK(cudaMemcpy(h_ret.data(), d_ret, sizeof(char), cudaMemcpyDeviceToHost));
         for(unsigned char i = 0; i <= 255; ++i) {
-            switch(i): {
+            switch(i) {
                 case 'A':
-                EXPECT_EQ(h_ret[i], static_cast<char>(0b00));
-                break;
+                    EXPECT_EQ(h_ret[i], static_cast<char>(0b00));
+                    break;
                 case 'C':
-                EXPECT_EQ(h_ret[i], static_cast<char>(0b01));
-                break;
+                    EXPECT_EQ(h_ret[i], static_cast<char>(0b01));
+                    break;
                 case 'G':
-                EXPECT_EQ(h_ret[i], static_cast<char>(0b10));
-                break;
+                    EXPECT_EQ(h_ret[i], static_cast<char>(0b10));
+                    break;
                 case 'T':
-                EXPECT_EQ(h_ret[i], static_cast<char>(0b11));
-                break;
+                    EXPECT_EQ(h_ret[i], static_cast<char>(0b11));
+                    break;
                 default:
-                EXPECT_EQ(static_cast<unsigned char>(h_ret[i]), static_cast<unsigned char>(0x80))
+                    EXPECT_EQ(static_cast<unsigned char>(h_ret[i]), static_cast<unsigned char>(0x80));
             }
         }
         

@@ -1,9 +1,10 @@
 #pragma once
 #include <algorithm>
-#include <iostream>
-#include <string>
 #include <chrono>
+#include <iostream>
+#include <numeric>
 #include <stdexcept>
+#include <string>
 #include <sstream>
 #include <unordered_map>
 #include <utility>
@@ -40,10 +41,34 @@
 #define C_CU_TEST_RESULT
 
 struct TEST_RESULT {
+public:
     std::string TEST_SUITE;
     std::string TEST_NAME;
     bool TEST_PASSED;
     int TIME_TAKEN;             // ms
+
+};
+
+#endif
+
+#ifndef C_V_UF
+#define C_V_UF
+
+/*
+ *  Union find CPU side validation
+ *  - Tested on leetcode :D
+ */
+class v_union_find {
+public:
+    uint32_t* h;
+    uint32_t* p;
+    v_union_find() : h(nullptr), p(nullptr) {}
+    v_union_find(int n);
+    ~v_union_find();
+    int find(int x);
+    void join(int x, int y);
+    bool con(int x, int y);
+    
 };
 
 #endif
@@ -104,20 +129,12 @@ void EXPECT_NE(const T& EXP, const U& ACT) {
     }
 }
 
-inline void EXPECT_TRUE(bool ACT) {
-    if(!ACT) {
-        throw std::runtime_error("EXPECT_TRUE failed\nExpected: true\nActual: false");
-    }
-}
+inline void EXPECT_TRUE(bool ACT);
 
-inline void EXPECT_FALSE(bool ACT) {
-    if(ACT) {
-        throw std::runtime_error("EXPECT_FALSE failed\nExpected: false\nActual: true");
-    }
-}
+inline void EXPECT_FALSE(bool ACT);
 
 template<typename T, typename U, typename V>
-void EXPECT_NEAR(const T& EXP, const U& ACT, v THRESH) {
+void EXPECT_NEAR(const T& EXP, const U& ACT, V THRESH) {
     if(std::abs(EXP - ACT) > THRESH) {
         std::ostringstream oss;
         oss << "EXPECT_NEAR failed\nExpected difference <= " << THRESH << "\nActual difference: " << std::abs(EXP - ACT);
