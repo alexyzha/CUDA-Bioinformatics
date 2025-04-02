@@ -271,4 +271,100 @@ void CU_WRAPPER_TESTS(std::vector<TEST_RESULT*>& RESULTS) {
         }
     }));
 
+    // Kmer clustering kernel test
+    RESULTS.push_back(TEST("CU_WRAPPER_TESTS", "CLUSTER_KMERS", [](){
+        // Create testing variables
+        std::vector<fq_read*> reads;
+        std::vector<std::string> seqs = {"ACG", "GAT", "CAT", "CAG", "ACG"};
+        std::unordered_map<uint64_t, std::unordered_set<int>> kmer_map;
+        for(int i = 0; i < 5; ++i) {
+            reads.push_back(new fq_read(
+                "ID" + std::to_string(i),
+                3,
+                seqs[i],
+                "???"
+            ));
+        }
+        
+        // Run clustering kernel
+        std::vector<std::unordered_set<int>*> ret = cu_cluster_by_kmer(reads, 2, 2);
+
+        // Check results
+        EXPECT_NE([&]() {
+            return ret[0] ? ret[0] : ret[4];
+        }(), nullptr);
+        for(int i = 1; i <= 3; ++i) {
+            EXPECT_EQ(ret[i], nullptr);
+        }
+        if(ret[0]) {
+            EXPECT_EQ(ret[0]->size(), 1);
+            EXPECT_TRUE(ret[0]->count(4));
+        } else if(ret[4]) {
+            EXPECT_EQ(ret[4]->size(), 1);
+            EXPECT_TRUE(ret[4]->count(0));
+        }
+
+        // Clean
+        for(auto& read : reads) {
+            delete read;
+        }
+    }));
+
+    // Local align -> cigar test
+    RESULTS.push_back(TEST("CU_WRAPPER_TESTS", "LOCAL_ALIGNMENT", [](){
+        // Create testing variables;
+        std::vector<fq_read*> reads;
+        std::string ref = "GATCATG";
+        std::vector<std::string> seqs = {
+            "GATC",             // Full match
+            "ATCA",             // Full match middle
+            "ATCGT",            // Mismatch
+            "GATATG",           // Gap in read
+            "GATTCATG"          // Gap in ref
+        };
+        std::vector<std::string> exp_cig = {
+            "4M",
+            "4M",
+            "3M1X1M",
+            "3M1D3M",
+            "3M1I4M"
+        };
+        std::vector<std::vector<int>> exp_nums {
+            {3, 3, 8},          // {end ref, end read, score}
+            {4, 3, 8},
+            {4, 4, 7},
+            {6, 5, 10},
+            {6, 7, 12}
+        };
+        for(auto& seq : seqs) {
+            reads.push_back(new fq_read(
+                "[" + seq + "]",
+                seq.size(),
+                seq,
+                std::string(seq.size(), '?')
+            ));
+        }
+
+        // Run alignment kernel
+        std::vector<cu_alignment*> ret = cu_local_align(ref, reads);
+
+        // Check results
+        EXPECT_EQ(ret.size(), reads.size());
+        for(int i = 0; i < ret.size(); ++i) {
+            EXPECT_EQ(ret[i]->cigar, exp_cig[i]);
+            EXPECT_EQ(ret[i]->end_ref, exp_nums[i][0]);
+            EXPECT_EQ(ret[i]->end_read, exp_nums[i][1]);
+            EXPECT_EQ(ret[i]->score, exp_nums[i][2]);
+        }
+
+        // Clean up
+        for(auto& read : reads) {
+            delete read;
+        }
+        for(auto& aln : ret) {
+            delete aln->cigar;
+            delete aln;
+        }
+    }));
+
 }

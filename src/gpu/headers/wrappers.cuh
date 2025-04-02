@@ -35,3 +35,7 @@ std::vector<std::unordered_set<int>*> cu_cluster_by_kmer(
     size_t THRESH
 );
 
+std::vector<cu_alignment*> cu_local_align(
+    const std::string& REF, 
+    const std::vector<fq_read*>& READS
+);

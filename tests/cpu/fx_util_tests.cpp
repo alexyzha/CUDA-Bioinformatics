@@ -476,7 +476,7 @@ TEST(FX_UTIL, CLUSTER_BY_KMER) {
     EXPECT_NE([&]() {
         return res[0] ? res[0] : res[4];
     }(), nullptr) << RED << "EXP SET IN [0] OR [4], NULLPTR EVERYWHERE ELSE" << RESET << std::endl;
-    for(int i = 0; i <= 3; ++i) {
+    for(int i = 1; i <= 3; ++i) {
         EXPECT_EQ(res[i], nullptr) << RED << "EXP NULLPTR AT RES[" << i << "]" << RESET << std::endl;
     }
     if(res[0]) {
