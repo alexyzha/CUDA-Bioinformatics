@@ -17,21 +17,21 @@ int main(int argc, char* argv[]) {
     });
 
     // Output header
-    std::cout << "[==========] Running " << results.size() << " tests.\n";
+    std::cout << GREEN << "[==========] Running " << results.size() << " tests." << RESET << std::endl;
     std::string prev = "";
     int passed = 0;
     int failed = 0;
     for(auto& result : results) {
         if(result->TEST_SUITE != prev) {
-            std::cout << "[----------] " << "Test suite: " << result->TEST_SUITE << "\n";
+            std::cout << GREEN << "[----------] " << "Test suite: " << result->TEST_SUITE << RESET << std::endl;
             prev = result->TEST_SUITE;
         }
         std::string status = result->TEST_PASSED ? "       OK" : "***FAILED";
         std::cout << (result->TEST_PASSED ? GREEN : RED)
-                  << "[ " << status << " ] "
+                  << "[" << status << " ] "
                   << result->TEST_SUITE << "." << result->TEST_NAME
                   << " (" << result->TIME_TAKEN << " ms)"
-                  << RESET << "\n";
+                  << RESET << std::endl;
         if(result->TEST_PASSED) {
             ++passed;
         } else {
@@ -40,10 +40,10 @@ int main(int argc, char* argv[]) {
     }
 
     // Output summary
-    std::cout << "[==========] " << results.size() << " tests ran.\n";
-    std::cout << "[  PASSED  ] " << passed << "\n";
+    std::cout << GREEN << "[==========] " << results.size() << " tests ran." << RESET << std::endl;
+    std::cout << GREEN << "[  PASSED  ] " << passed << RESET << std::endl;
     if(failed) {
-        std::cout << "[  FAILED  ] " << failed << "\n";
+        std::cout << RED << "[  FAILED  ] " << failed << RESET << std::endl;
     }
 
     // Cleanup
