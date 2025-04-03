@@ -69,7 +69,7 @@ __device__ bool __cu_uf_con(cu_union_find* UF, int x, int y);
 
 #ifndef C_KMER_HASH_TABLE
 #define C_KMER_HASH_TABLE
-#define EMPTY 0
+#define EMPTY -1
 
 /*
  *  Hash table key-value pair for kmer counting/indexing
@@ -91,7 +91,7 @@ kh_pair<T>* kh_construct(int n) {
     CUDA_CHECK(cudaMalloc(&map, sizeof(kh_pair<T>) * n));
 
     // Init all as empty
-    CUDA_CHECK(cudaMemset(map, 0, sizeof(kh_pair<T>) * n));
+    CUDA_CHECK(cudaMemset(map, EMPTY, sizeof(kh_pair<T>) * n));
     return map;
 }
 

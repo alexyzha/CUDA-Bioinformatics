@@ -53,67 +53,61 @@ void cu_uf_destruct(cu_union_find* d_uf) {
 
 __device__ int __cu_uf_find(cu_union_find* UF, int x) {
     // Avoid recursion, do iteration even if it kinda sucks
-    int root = x;
+    int total_h = 0;
     while(true) {
-        int parent = UF->p[root];
-        if(parent == root) {
+        int px = UF->p[x];
+        if(px == x) {
             break;
         }
-        root = parent;
+        int gpx = UF->p[px];
+        int local_h = atomicExch(&UF->h[x], 0);
+        total_h += local_h;
+
+        // Compress
+        atomicCAS(&UF->p[x], px, gpx);
+        x = px;
     }
 
-    // Thread safety
-    while(UF->p[x] != root) {
-        int parent = UF->p[x];
-        atomicCAS(&UF->p[x], parent, root);
-        x = parent;
-    }
-
-    // Path compressed
-    return root;
+    // Path compressed + aggregate
+    atomicAdd(&UF->h[x], total_h);
+    return x;
 }
 
 /*
- *  Modified join-by-height -> h[root] = count of all nodes in tree `NEED TO FIX`
+ *  Modified join-by-height -> h[root] = count of all nodes in tree
  *  @param UF `cu_union_find*`
  *  @param x `int`
  *  @param y `int`
  *  @return `void`
  */
 __device__ void __cu_uf_join(cu_union_find* UF, int x, int y) {
-    int px = __cu_uf_find(UF, x);
-    int py = __cu_uf_find(UF, y);
-    if(px == py) {
+    if(__cu_uf_con(UF, x, y)) {
         return;
     }
     
     // Need to use atomics for thread safety
     while(true) {
-        px = __cu_uf_find(UF, px);
-        py = __cu_uf_find(UF, py);
+        int px = __cu_uf_find(UF, x);
+        int py = __cu_uf_find(UF, y);
         
         // Joined
         if(px == py) {
-            return;
+            break;
         }
         
-        // Get sizes
-        uint32_t px_size = atomicAdd(&UF->h[px], 0);
-        uint32_t py_size = atomicAdd(&UF->h[py], 0);
+        // Favor smaller indexed root
+        if(px > py) {
+            int temp = px;
+            px = py;
+            py = temp;
+        }
 
-        // Join logic, favor x's parent as root in tiebreaker; favor lower index as root
-        if(px_size >= py_size) {
-            if(atomicCAS(&UF->p[py], py, px) == py) {
-                // Linked py -> px, h[px] += h[py]
-                atomicAdd(&UF->h[px], py_size);
-                break;
-            }
-        } else {
-            if(atomicCAS(&UF->p[px], px, py) == px) {
-                // Linked px -> py, h[py] += h[px]
-                atomicAdd(&UF->h[py], px_size);
-                break;
-            }
+        // Link py to px
+        if(atomicCAS(&UF->p[py], py, px) == py) {
+            int moved_h = atomicExch(&UF->h[py], 0);
+            atomicAdd(&UF->h[px], moved_h);
+            __threadfence();
+            break;
         }
 
     }

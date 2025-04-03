@@ -2,21 +2,27 @@
 
 #ifdef C_V_UF
 
-int v_union_find::find(int x) {
-    if(x = p[x]) {
-        return x;
-    }
-    return p[x] = find(p[x]);
-}
-
 v_union_find::v_union_find(int n) {
     h = new uint32_t[n];
     p = new uint32_t[n];
+    for(int i = 0; i < n; ++i) {
+        h[i] = 1;
+        p[i] = i;
+    }
 }
 
 v_union_find::~v_union_find() {
     delete[] h;
     delete[] p;
+}
+
+int v_union_find::find(int x) {
+    if(x == p[x]) {
+        return x;
+    }
+    h[p[x]] += h[x];
+    h[x] = 0;
+    return p[x] = find(p[x]);
 }
 
 void v_union_find::join(int x, int y) {
@@ -25,13 +31,12 @@ void v_union_find::join(int x, int y) {
     if(px == py) {
         return;
     }
-    if(h[px] >= h[py]) {
-        p[py] = px;
-        h[px] += h[py];
-    } else {
-        p[px] = py;
-        h[py] += h[px];
+    if(px > py) {
+        std::swap(px, py);
     }
+    p[py] = px;
+    h[px] += h[py];
+    h[py] = 0;
 }
 
 bool v_union_find::con(int x, int y) {

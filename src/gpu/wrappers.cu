@@ -66,7 +66,7 @@ std::vector<fq_read*> cu_filter_fq(const std::vector<fq_read*>& READS, char FILT
         for(int i = 0; i < READ_LEN; ++i) {
             int f_index = i / 64;
             int f_bit = i % 64;
-            if(ret_filter[f_index] & (1ULL << f_bit)) {
+            if(ret_filter[f_index] & ((ULL)1 << f_bit)) {
                 filtered_reads.push_back(READS[i]);
             }
         }
@@ -167,7 +167,7 @@ std::unordered_map<uint64_t, uint64_t> cu_count_kmers(const std::vector<fq_read*
     std::unordered_map<uint64_t, uint64_t> ret;
     ret.reserve(MAP_SIZE / 8);
     for(int i = 0; i < MAP_SIZE; ++i) {
-        if(h_map[i].key == EMPTY) {
+        if(h_map[i].key == (ULL)EMPTY) {
             continue;
         }
         ret[h_map[i].key] = h_map[i].value;
@@ -230,12 +230,12 @@ std::unordered_map<uint64_t, std::unordered_set<int>> cu_index_kmers(const std::
     std::unordered_map<uint64_t, std::unordered_set<int>> ret;
     ret.reserve(MAP_SIZE / 4);
     for(int i = 0; i < MAP_SIZE; ++i) {
-        if(h_map[i].key == EMPTY) {
+        if(h_map[i].key == (ULL)EMPTY) {
             continue;
         }
 
         // Insert up until MAP_MAX_INDICES matching indices
-        for(int j = 1; j <= h_map[i].value[0]; ++j) {
+        for(int j = 1; j <= (h_map[i].value[0] - EMPTY); ++j) {
             ret[h_map[i].key].insert(h_map[i].value[j]);
         }
     }
@@ -342,7 +342,7 @@ std::vector<std::unordered_set<int>*> cu_cluster_by_kmer(const std::vector<fq_re
     kh_pair<uint32_t[MAP_MAX_INDICES + 1]>* d_clusters = kh_construct<uint32_t[MAP_MAX_INDICES + 1]>(CLUSTER_MAP_SIZE);
 
     // Run cluster kernel
-    cu_get_clusters <<<UF_SIZE, THREADS>>> (
+    cu_get_clusters <<<(UF_SIZE / THREADS) + 1, THREADS>>> (
         d_uf,
         d_clusters,
         UF_SIZE,
@@ -356,21 +356,21 @@ std::vector<std::unordered_set<int>*> cu_cluster_by_kmer(const std::vector<fq_re
     CUDA_CHECK(cudaMemcpy(h_ret_map.data(), d_clusters, sizeof(kh_pair<uint32_t[MAP_MAX_INDICES + 1]>) * CLUSTER_MAP_SIZE, cudaMemcpyDeviceToHost));
 
     // Format data
-    std::vector<std::unordered_set<int>*> ret(READ_LEN);
-    for(auto& i : ret) {
-        i = new std::unordered_set<int>();
-        i->reserve(MAP_MAX_INDICES / 8);
-    }
+    std::vector<std::unordered_set<int>*> ret(READ_LEN, nullptr);
 
     // Enter data
     for(int i = 0; i < CLUSTER_MAP_SIZE; ++i) {
-        if(h_ret_map[i].key == EMPTY) {
+        if(h_ret_map[i].key == (ULL)EMPTY) {
             continue;
         }
 
         // Insert up until MAP_MAX_INDICES indices
-        for(int j = 1; j <= h_ret_map[i].value[0]; ++j) {
-            ret[h_ret_map[i].key]->insert(h_ret_map[i].value[j]);
+        int root = h_ret_map[i].key;
+        if(!ret[root]) {
+            ret[root] = new std::unordered_set<int>();
+        }
+        for(int j = 1; j <= (h_ret_map[i].value[0] - EMPTY); ++j) {
+            ret[root]->insert(h_ret_map[i].value[j]);
         }
     }
 

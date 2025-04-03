@@ -14,14 +14,14 @@ __global__ void cu_filter_reads(char* ALL_SEQ, uint32_t* OFFSETS, size_t LEN, ch
     // Check seq
     switch(FILTER_MODE) {
         case AVERAGE_DISCARD_WHOLE: {
-            uint64_t sum = 0;
+            int sum = 0;
             for(int i = 0; i < SEQ_SIZE; ++i) {
-                sum += ALL_SEQ[SEQ_BEGIN + 1];
+                sum += ALL_SEQ[SEQ_BEGIN + i];
             }
 
             // Do not discard if average >= THRESH
-            if((static_cast<double>(sum) / SEQ_SIZE) >= THRESH) {
-                FILTER_MASK[SEQ_NUM / 64] |= ((ULL)1 << (SEQ_NUM % 64));
+            if(sum >= (SEQ_SIZE * THRESH)) {
+                atomicOr((ULL*)&FILTER_MASK[SEQ_NUM / 64], (1ULL << (SEQ_NUM % 64)));
             }
             break;
         }
@@ -30,12 +30,12 @@ __global__ void cu_filter_reads(char* ALL_SEQ, uint32_t* OFFSETS, size_t LEN, ch
             for(int i = 0; i < SEQ_SIZE; ++i) {
                 if(ALL_SEQ[SEQ_BEGIN + i] < THRESH) {
                     // Discard
-                    break;
+                    return;
                 }
             }
             
             // Do not discard
-            FILTER_MASK[SEQ_NUM / 64] |= ((ULL)1 << (SEQ_NUM % 64));
+            atomicOr((ULL*)&FILTER_MASK[SEQ_NUM / 64], (1ULL << (SEQ_NUM % 64)));
             break;
         }
 
@@ -51,7 +51,7 @@ __global__ void cu_filter_reads(char* ALL_SEQ, uint32_t* OFFSETS, size_t LEN, ch
 
             // Discard if proportion under thresh > PROPORTION
             if((static_cast<double>(count) / SEQ_SIZE) <= PROPORTION) {
-                FILTER_MASK[SEQ_NUM / 64] |= ((ULL)1 << (SEQ_NUM % 64));
+                atomicOr((ULL*)&FILTER_MASK[SEQ_NUM / 64], (1ULL << (SEQ_NUM % 64)));
             }
             break;
         }

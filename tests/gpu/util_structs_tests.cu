@@ -12,8 +12,8 @@ void CU_UTIL_STRUCTS_TESTS(std::vector<TEST_RESULT*>& RESULTS) {
         // Copy device -> host
         CUDA_CHECK(cudaMemcpy(h_map, d_map, sizeof(h_map), cudaMemcpyDeviceToHost));
         for(int i = 0; i < 100; ++i) {
-            EXPECT_EQ((uint64_t)0, h_map[i].key);
-            EXPECT_EQ((uint64_t)0, h_map[i].value);
+            EXPECT_EQ((uint64_t)EMPTY, h_map[i].key);
+            EXPECT_EQ((uint64_t)EMPTY, h_map[i].value);
         }
 
         // Clean up
@@ -29,9 +29,9 @@ void CU_UTIL_STRUCTS_TESTS(std::vector<TEST_RESULT*>& RESULTS) {
         // Copy device -> host
         CUDA_CHECK(cudaMemcpy(h_map, d_map, sizeof(h_map), cudaMemcpyDeviceToHost));
         for(int i = 0; i < 10; ++i) {
-            EXPECT_EQ((uint64_t)0, h_map[i].key);
+            EXPECT_EQ((uint64_t)EMPTY, h_map[i].key);
             for(int j = 0; j < 100; ++j) {
-                EXPECT_EQ((uint64_t)0, h_map[i].value[j]);
+                EXPECT_EQ((uint64_t)EMPTY, h_map[i].value[j]);
             }
         }
 
@@ -85,20 +85,21 @@ void CU_UTIL_STRUCTS_TESTS(std::vector<TEST_RESULT*>& RESULTS) {
     RESULTS.push_back(TEST("CU_UTIL_STRUCTS", "UF_FIND", [](){
         // Consts
         int NODES = 200;
-
+        
         // Create union find and index list
         v_union_find val_uf(NODES);
         for(int i = 0; i < 256; ++i) {
             val_uf.join(rand() % NODES, rand() % NODES);
         }
+
         std::vector<uint32_t> h_indexlist(NODES);
         std::iota(h_indexlist.begin(), h_indexlist.end(), 0);
-
+        
         // Device variables
         cu_union_find* d_uf;
         uint32_t* d_roots;
         uint32_t* d_indexlist;
-
+        
         // Allocate/copy/set mem
         CUDA_CHECK(cudaMalloc(&d_uf, sizeof(cu_union_find)));
         CUDA_CHECK(cudaMalloc(&d_roots, sizeof(uint32_t) * NODES));
@@ -107,7 +108,7 @@ void CU_UTIL_STRUCTS_TESTS(std::vector<TEST_RESULT*>& RESULTS) {
         CUDA_CHECK(cudaMemcpy(d_indexlist, h_indexlist.data(), sizeof(uint32_t) * NODES, cudaMemcpyHostToDevice));
         
         // Special mem handle for struct
-        cu_union_find* temp_uf;
+        cu_union_find* temp_uf = new cu_union_find;
         CUDA_CHECK(cudaMalloc(&temp_uf->h, sizeof(uint32_t) * NODES));
         CUDA_CHECK(cudaMalloc(&temp_uf->p, sizeof(uint32_t) * NODES));
         CUDA_CHECK(cudaMemcpy(temp_uf->h, val_uf.h, sizeof(uint32_t) * NODES, cudaMemcpyHostToDevice));
@@ -124,12 +125,12 @@ void CU_UTIL_STRUCTS_TESTS(std::vector<TEST_RESULT*>& RESULTS) {
         for(int i = 0; i < NODES; ++i) {
             EXPECT_EQ(h_roots[i], static_cast<uint32_t>(val_uf.find(h_indexlist[i])));
         }
-
+        
         // Clean up
-        CUDA_CHECK(cudaFree(temp_uf));
         CUDA_CHECK(cudaFree(d_indexlist));
         CUDA_CHECK(cudaFree(d_roots));
         cu_uf_destruct(d_uf);
+        free(temp_uf);
     }));
 
     // Union find con test
@@ -163,7 +164,7 @@ void CU_UTIL_STRUCTS_TESTS(std::vector<TEST_RESULT*>& RESULTS) {
         CUDA_CHECK(cudaMemcpy(d_edgelist, h_edgelist.data(), sizeof(uint32_t) * EDGES, cudaMemcpyHostToDevice));
         
         // Special mem handle for struct
-        cu_union_find* temp_uf;
+        cu_union_find* temp_uf = new cu_union_find;
         CUDA_CHECK(cudaMalloc(&temp_uf->h, sizeof(uint32_t) * NODES));
         CUDA_CHECK(cudaMalloc(&temp_uf->p, sizeof(uint32_t) * NODES));
         CUDA_CHECK(cudaMemcpy(temp_uf->h, val_uf.h, sizeof(uint32_t) * NODES, cudaMemcpyHostToDevice));
@@ -184,10 +185,10 @@ void CU_UTIL_STRUCTS_TESTS(std::vector<TEST_RESULT*>& RESULTS) {
         }
 
         // Clean up
-        CUDA_CHECK(cudaFree(temp_uf));
         CUDA_CHECK(cudaFree(d_edgelist));
         CUDA_CHECK(cudaFree(d_ret));
         cu_uf_destruct(d_uf);
+        free(temp_uf);
     }));
 
     // Union find join test
@@ -195,15 +196,16 @@ void CU_UTIL_STRUCTS_TESTS(std::vector<TEST_RESULT*>& RESULTS) {
         // Consts
         int NODES = 200;
         int EDGES = 256 * 2;
+        int NUM_RUNS = 10;
         
         // Create edge list & validation
         v_union_find val_uf(NODES);     
-        std::vector<uint32_t> u_edgelist;
+        std::vector<uint32_t> h_edgelist;
         for(int i = 0; i < 256; ++i) {
             int first = rand() % NODES;
             int second = rand() % NODES;
-            u_edgelist.push_back(first);
-            u_edgelist.push_back(second);
+            h_edgelist.push_back(first);
+            h_edgelist.push_back(second);
             val_uf.join(first, second);
         } 
 
@@ -213,17 +215,20 @@ void CU_UTIL_STRUCTS_TESTS(std::vector<TEST_RESULT*>& RESULTS) {
         
         // Allocate mem
         CUDA_CHECK(cudaMalloc(&d_edgelist, sizeof(uint32_t) * EDGES));
+        CUDA_CHECK(cudaMemcpy(d_edgelist, h_edgelist.data(), sizeof(uint32_t) * EDGES, cudaMemcpyHostToDevice));
 
         // Run kernel
-        cu_uf_join <<<16, 16>>> (d_uf, d_edgelist, EDGES);
-        CUDA_CHECK(cudaDeviceSynchronize());
-
+        for(int i = 0; i < NUM_RUNS; ++i) {
+            cu_uf_join <<<16, 16>>> (d_uf, d_edgelist, EDGES);
+            CUDA_CHECK(cudaDeviceSynchronize());
+        }
+        
         // Copy mem over
-        cu_union_find* h_uf;
-        v_union_find ret_uf;
-        CUDA_CHECK(cudaMemcpy(h_uf, d_uf, sizeof(cu_union_find), cudaMemcpyDeviceToHost));
-        CUDA_CHECK(cudaMemcpy(ret_uf.h, h_uf->h, sizeof(uint32_t) * NODES, cudaMemcpyDeviceToHost));
-        CUDA_CHECK(cudaMemcpy(ret_uf.p, h_uf->p, sizeof(uint32_t) * NODES, cudaMemcpyDeviceToHost));
+        cu_union_find h_uf;
+        v_union_find ret_uf(NODES);
+        CUDA_CHECK(cudaMemcpy(&h_uf, d_uf, sizeof(cu_union_find), cudaMemcpyDeviceToHost));
+        CUDA_CHECK(cudaMemcpy(ret_uf.h, h_uf.h, sizeof(uint32_t) * NODES, cudaMemcpyDeviceToHost));
+        CUDA_CHECK(cudaMemcpy(ret_uf.p, h_uf.p, sizeof(uint32_t) * NODES, cudaMemcpyDeviceToHost));
 
         // Validate
         for(int i = 0; i < NODES; ++i) {
@@ -237,8 +242,6 @@ void CU_UTIL_STRUCTS_TESTS(std::vector<TEST_RESULT*>& RESULTS) {
         // Clean
         CUDA_CHECK(cudaFree(d_edgelist));
         cu_uf_destruct(d_uf);
-        delete &ret_uf;
-        delete &val_uf;
     }));
 
 }

@@ -40,5 +40,5 @@ __global__ void cu_get_clusters(
     kh_pair<uint32_t[MAP_MAX_INDICES + 1]>* MAP,
     size_t LEN,                         // Size of UF arrays = number of nodes
     size_t MAP_LEN,                     // = 2 * exp number of elements in MAP
-    size_t K
+    size_t THRESH
 );
