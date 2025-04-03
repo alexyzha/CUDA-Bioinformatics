@@ -3,6 +3,11 @@
 #ifndef C_SAM_READ
 #define C_SAM_READ
 
+/**
+ *  @brief Contains all data from a singluar SAM read.
+ *  @note Built specifically with structured bindings in mind: no functions.
+ *  @note See declaration for more detailed description of data layout.
+ */
 struct sam_read {
 public:
     std::vector<std::string> tags;
@@ -22,7 +27,8 @@ public:
 
 #endif
 
-/*
+/*  
+ *  DESCRIPTION OF SAM READ DATA LAYOUT IN FILE (1-12)
  *  1. Query name (QNAME): read id
  *  2. FLAG: bitmask for flags, req uint16_t
  *  3. Reference name (RNAME): which contig in the reference genome the read is aligned to (should be found in headers in one of the @SQ lines)
@@ -36,10 +42,8 @@ public:
  *  11. Quality string (QUAL): quality of read
  *  12. Predefined tags: additional information for alignment or read
  *  
- *  Tab separated
- *  Headers begin with @**
- *  Simple aggregate used, structured binding syntax:
- *  - auto [tags, qname, rname, cigar, rnext, seq, qual, flags, pos, posnext, tlen, mapq] = read;
+ *  Simple aggregate used, structured binding syntax (13, 14):
+ *  13. auto [tags, qname, rname, cigar, rnext, seq, qual, flags, pos, posnext, tlen, mapq] = read;
  *  Decl/construct:
- *  - sam_read read = {vec<str>, str*6, uin16, sizet*3, char}
+ *  14. sam_read read = {vec<str>, str, str, str, str, str, str, uint16_t, sizet, size_t, size_t, char};
  */

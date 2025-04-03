@@ -3,15 +3,20 @@
 #ifndef C_ALIGNMENT
 #define C_ALIGNMENT
 
+/**
+ *  @brief Holds the results from a Smith-Waterman local alignment.
+ *  @note The CUDA version `cu_alignment` holds a `char*` to a CIGAR string instead of both aligned ref and read.
+ */
 struct alignment {
 public:
-    /*
-     *  `alignment` default constructor.
+    /**
+     *  @brief `alignment` default constructor.
+     *  @note Default constructor sets `int` to 0, `string*` to nullptr.
      */
     alignment();
 
-    /*
-     *  `alignment` constructor.
+    /**
+     *  @brief `alignment` constructor.
      *  @param s `int` score
      *  @param erf `int` end of reference sequence
      *  @param erd `int` end of read sequence
@@ -34,31 +39,32 @@ public:
 #ifndef C_UF
 #define C_UF
 
-/*
- *  `union_find` only has a default constructor.
- *  @param ._. My poor baby...
- *  @return I'm sorry but the umap was the only way... D,:
- *  
+/**
+ *  @brief `union_find` only has a default constructor.
+ *  @note This implementation of union find uses unordered maps instead of arrays for parent and height.
+ *  @note The CUDA implementation of union find uses different find/join functions and arrays instead of maps.
  */
 class union_find {
 public:
-    /*
-     *  Finds the root of `x` while performing path compression.
+    /**
+     *  @brief Finds the root of `x` while performing path compression.
      *  @param x `int`
      *  @return `int`
+     *  @note Different implementation than the CUDA version's find.
      */
     int find(int x);
 
-    /*
-     *  Joins `x` and `y`. Performs path compression for both variables.
+    /**
+     *  @brief Joins `x` and `y`. Performs path compression for both variables.
      *  @param x `int`
      *  @param y `int`
      *  @return `void`
+     *  @note Different implementation than the CUDA version's join.
      */
     void join(int x, int y);
 
-    /*
-     *  Returns true if `x` and `y` are connected. Performs path compression for both variables.
+    /**
+     *  @brief Returns true if `x` and `y` are connected. Performs path compression for both variables.
      *  @param x `int`
      *  @param y `int`
      *  @return `bool`
