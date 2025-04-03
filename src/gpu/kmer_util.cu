@@ -135,7 +135,7 @@ __global__ void cu_get_kmer_overlaps(kh_pair<uint32_t[MAP_MAX_INDICES + 1]>* MAP
     }
 }
 
-__global__ void cu_get_uf(cu_union_find* UF, size_t LEN, size_t NODES, uint32_t* EDGE_LIST, uint32_t EDGE_COUNT) {
+__global__ void cu_get_uf(cu_union_find* UF, size_t LEN, uint32_t* EDGE_LIST, uint32_t EDGE_COUNT) {
     // Block/thread OOB checks
     int INDEX = (blockIdx.x * blockDim.x + threadIdx.x) * 2;
     if(INDEX + 1 >= EDGE_COUNT) {

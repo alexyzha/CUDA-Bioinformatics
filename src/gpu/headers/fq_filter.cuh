@@ -1,7 +1,7 @@
 #include "util_structs.cuh"
 
-/*
- *  Returns bitmask [1 = keep][0 = discard] based on `FILTER_MODE`
+/**
+ *  @brief Populates bitmask based on `FILTER_MODE`
  *  @param ALL_SEQ `char*` all `LEN` sequences in order, flattened
  *  @param OFFSETS `uint32_t*` array of offsets, `OFFSETS[i]` = end index of seq `i`
  *  @param LEN `size_t` number of sequences
@@ -10,6 +10,7 @@
  *  @param FILTER_MASK `uint64_t*` results
  *  @param PROPORTION `double` default = 0.0, used for filter modes with proportions
  *  @return `void`
+ *  @note For bitmask, 1 = keep, 0 = discard.
  */
 __global__ void cu_filter_reads(
     char* ALL_SEQ,
@@ -21,8 +22,8 @@ __global__ void cu_filter_reads(
     double PROPORTION
 );
 
-/*
- *  Modifies ALL_SEQ, denotes end of trimmed seq with '\0`
+/**
+ *  @brief Modifies ALL_SEQ, denotes end of trimmed seq with '\0`
  *  @param ALL_SEQ `char*` all `LEN` sequences in order, flattened
  *  @param OFFSETS `uint32_t*` array of offsets, `OFFSETS[i]` = end index of seq `i`
  *  @param LEN `size_t` number of sequences
@@ -30,6 +31,7 @@ __global__ void cu_filter_reads(
  *  @param THRESH `char` filter threshold
  *  @param PROPORTION `double` default = 0.0
  *  @return `void`
+ *  @note Do not allocate an extra `char*` buffer. Trimming is done in place in `ALL_SEQ`.
  */
 __global__ void cu_filter_reads_sw(
     char* ALL_SEQ,

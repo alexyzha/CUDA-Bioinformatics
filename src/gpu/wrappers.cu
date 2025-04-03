@@ -332,7 +332,6 @@ std::vector<std::unordered_set<int>*> cu_cluster_by_kmer(const std::vector<fq_re
     cu_get_uf <<<((h_edgecount / 2) / THREADS) + 1, THREADS>>> (
         d_uf,
         UF_SIZE,
-        READ_LEN,
         d_edgelist,
         h_edgecount
     );
