@@ -1,6 +1,8 @@
+## General
 .DS_Store
-.ipynb_checkpoints
-obj
 .vscode
-files
-build
+
+## Temp file directories
+obj/
+files/
+build/
