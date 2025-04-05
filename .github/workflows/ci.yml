@@ -78,5 +78,7 @@ jobs:
     - name: PUBLISH ALL TEST RESULTS
       uses: EnricoMi/publish-unit-test-result-action@v2
       with:
-        files: tests/cpu/all_cpu_report.xml
-        check_name: "CPU TEST RESULTS"
+        files: |
+          tests/cpu/all_cpu_report.xml 
+          tests/gpu/outfiles/all_gpu_report.xml
+        check_name: "CPU & GPU TEST RESULTS"

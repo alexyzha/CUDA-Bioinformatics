@@ -2,6 +2,8 @@
 #include <algorithm>
 #include <bitset>
 #include <chrono>
+#include <ctime>
+#include <iomanip>
 #include <iostream>
 #include <numeric>
 #include <stdexcept>
@@ -57,9 +59,9 @@ public:
 #ifndef C_V_UF
 #define C_V_UF
 
-/*
+/**
  *  Union find CPU side validation
- *  - Tested on leetcode :D
+ *  @note Tested on leetcode :D
  */
 class v_union_find {
 public:
@@ -76,6 +78,12 @@ public:
 
 #endif
 
+/**
+ *  A macro for creating a container for test results.
+ *  @param TEST_SUITE `string`
+ *  @param TEST_NAME `string`
+ *  @param TEST_FXN `*` expects a void lambda that throws on test fail  
+ */
 template<typename T>
 TEST_RESULT* TEST(std::string TEST_SUITE, std::string TEST_NAME, T TEST_FXN) {
     std::cout << GREEN << "--> " << TEST_SUITE << '.' << TEST_NAME << RESET << std::endl; 
@@ -116,6 +124,10 @@ TEST_RESULT* TEST(std::string TEST_SUITE, std::string TEST_NAME, T TEST_FXN) {
     }
 }
 
+/**
+ *  Expect equal macro.
+ *  @note Throws on fail.
+ */
 template<typename T>
 void EXPECT_EQ(T EXP, T ACT) {
     if(!(EXP == ACT)) {
@@ -125,6 +137,10 @@ void EXPECT_EQ(T EXP, T ACT) {
     }
 }
 
+/**
+ *  Expect not equal macro.
+ *  @note Throws on fail.
+ */
 template<typename T>
 void EXPECT_NE(T EXP, T ACT) {
     if(EXP == ACT) {
@@ -134,10 +150,22 @@ void EXPECT_NE(T EXP, T ACT) {
     }
 }
 
+/**
+ *  Expect true macro.
+ *  @note Throws on fail.
+ */
 void EXPECT_TRUE(bool ACT);
 
+/**
+ *  Expect false macro.
+ *  @note Throws on fail.
+ */
 void EXPECT_FALSE(bool ACT);
 
+/**
+ *  Expect near macro for floats/doubles.
+ *  @note Throws on fail.
+ */
 template<typename T>
 void EXPECT_NEAR(T EXP, T ACT, T THRESH) {
     if(std::abs(EXP - ACT) > THRESH) {

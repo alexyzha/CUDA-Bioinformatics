@@ -1,0 +1,25 @@
+<testsuites tests="17" failures="0" disabled="0" errors="0" time="0.078" timestamp="2025-04-05T23:40:58.458" name="AllTests">
+	<testsuite name="CU_WRAPPER_TESTS" tests="8" failures="0" disabled="0" skipped="0" errors="0" time = "0.014" timestamp="2025-04-05T23:40:58.458">
+		<testcase name="CLUSTER_KMERS" file="CU_WRAPPER_TESTS_tests.cpp" line="0" status="run" result="completed" time="0.000" timestamp="2025-04-05T23:40:58.458" classname="CU_WRAPPER_TESTS"/>
+		<testcase name="COUNT_KMERS" file="CU_WRAPPER_TESTS_tests.cpp" line="0" status="run" result="completed" time="0.014" timestamp="2025-04-05T23:40:58.458" classname="CU_WRAPPER_TESTS"/>
+		<testcase name="FILTER_FQ_AVERAGE_DISCARD_WHOLE" file="CU_WRAPPER_TESTS_tests.cpp" line="0" status="run" result="completed" time="0.000" timestamp="2025-04-05T23:40:58.458" classname="CU_WRAPPER_TESTS"/>
+		<testcase name="FILTER_FQ_PROPORTION_DISCARD_WHOLE" file="CU_WRAPPER_TESTS_tests.cpp" line="0" status="run" result="completed" time="0.000" timestamp="2025-04-05T23:40:58.458" classname="CU_WRAPPER_TESTS"/>
+		<testcase name="FILTER_FQ_SINGLE_DISCARD_WHOLE" file="CU_WRAPPER_TESTS_tests.cpp" line="0" status="run" result="completed" time="0.000" timestamp="2025-04-05T23:40:58.458" classname="CU_WRAPPER_TESTS"/>
+		<testcase name="FILTER_FQ_SLIDING_WINDOW" file="CU_WRAPPER_TESTS_tests.cpp" line="0" status="run" result="completed" time="0.000" timestamp="2025-04-05T23:40:58.458" classname="CU_WRAPPER_TESTS"/>
+		<testcase name="INDEX_KMERS" file="CU_WRAPPER_TESTS_tests.cpp" line="0" status="run" result="completed" time="0.000" timestamp="2025-04-05T23:40:58.458" classname="CU_WRAPPER_TESTS"/>
+		<testcase name="LOCAL_ALIGNMENT" file="CU_WRAPPER_TESTS_tests.cpp" line="0" status="run" result="completed" time="0.000" timestamp="2025-04-05T23:40:58.458" classname="CU_WRAPPER_TESTS"/>
+	</testsuite>
+	<testsuite name="CU_UTIL_STRUCTS" tests="6" failures="0" disabled="0" skipped="0" errors="0" time = "0.000" timestamp="2025-04-05T23:40:58.458">
+		<testcase name="KMER_HASHING" file="CU_UTIL_STRUCTS_tests.cpp" line="0" status="run" result="completed" time="0.000" timestamp="2025-04-05T23:40:58.458" classname="CU_UTIL_STRUCTS"/>
+		<testcase name="KMER_HASHTABLE_CONSTRUCTOR_ARRAY" file="CU_UTIL_STRUCTS_tests.cpp" line="0" status="run" result="completed" time="0.000" timestamp="2025-04-05T23:40:58.458" classname="CU_UTIL_STRUCTS"/>
+		<testcase name="KMER_HASHTABLE_CONSTRUCTOR_BASIC" file="CU_UTIL_STRUCTS_tests.cpp" line="0" status="run" result="completed" time="0.000" timestamp="2025-04-05T23:40:58.458" classname="CU_UTIL_STRUCTS"/>
+		<testcase name="UF_CON" file="CU_UTIL_STRUCTS_tests.cpp" line="0" status="run" result="completed" time="0.000" timestamp="2025-04-05T23:40:58.458" classname="CU_UTIL_STRUCTS"/>
+		<testcase name="UF_FIND" file="CU_UTIL_STRUCTS_tests.cpp" line="0" status="run" result="completed" time="0.000" timestamp="2025-04-05T23:40:58.458" classname="CU_UTIL_STRUCTS"/>
+		<testcase name="UF_JOIN" file="CU_UTIL_STRUCTS_tests.cpp" line="0" status="run" result="completed" time="0.000" timestamp="2025-04-05T23:40:58.458" classname="CU_UTIL_STRUCTS"/>
+	</testsuite>
+	<testsuite name="CU_UTIL" tests="3" failures="0" disabled="0" skipped="0" errors="0" time = "0.064" timestamp="2025-04-05T23:40:58.458">
+		<testcase name="BASE_TO_BIT_ALL" file="CU_UTIL_tests.cpp" line="0" status="run" result="completed" time="0.000" timestamp="2025-04-05T23:40:58.458" classname="CU_UTIL"/>
+		<testcase name="MAX_A<B" file="CU_UTIL_tests.cpp" line="0" status="run" result="completed" time="0.064" timestamp="2025-04-05T23:40:58.458" classname="CU_UTIL"/>
+		<testcase name="MAX_A>B" file="CU_UTIL_tests.cpp" line="0" status="run" result="completed" time="0.000" timestamp="2025-04-05T23:40:58.458" classname="CU_UTIL"/>
+	</testsuite>
+</testsuites>
