@@ -87,7 +87,7 @@ __global__ void cu_kmer_index(kh_pair<uint32_t[MAP_MAX_INDICES + 1]>* MAP, char*
                 if(prev == key || prev == (ULL)EMPTY) {
                     // value[0] = last free index
                     uint32_t* values = &MAP[cur].value[0];
-                    uint32_t count = atomicAdd(&values[0], 1) - EMPTY + 1;
+                    uint32_t count = atomicAdd(&values[0], 1) + EMPTY_OFFSET + 1;
 
                     // Prevent overflow/add index to list
                     if(count <= MAP_MAX_INDICES) {
@@ -117,8 +117,8 @@ __global__ void cu_get_kmer_overlaps(kh_pair<uint32_t[MAP_MAX_INDICES + 1]>* MAP
     uint32_t count = matches[0];
 
     // Iterate through all pairs
-    for(int i = 1; i <= (count - (int)EMPTY); ++i) {
-        for(int j = i + 1; j <= (count - (int)EMPTY); ++j) {
+    for(int i = 1; i <= (count + EMPTY_OFFSET); ++i) {
+        for(int j = i + 1; j <= (count + EMPTY_OFFSET); ++j) {
             uint32_t src = matches[i];
             uint32_t dest = matches[j];
 
@@ -171,7 +171,7 @@ __global__ void cu_get_clusters(cu_union_find* UF, kh_pair<uint32_t[MAP_MAX_INDI
         if(prev == px || prev == (ULL)EMPTY) {
             // cluster[0] = last free index
             uint32_t* cluster = &MAP[cur].value[0];
-            uint32_t count = atomicAdd(&cluster[0], 1) - EMPTY + 1;
+            uint32_t count = atomicAdd(&cluster[0], 1) + EMPTY_OFFSET + 1;
 
             // Prevent overflow/add index to list
             if(count <= MAP_MAX_INDICES) {

@@ -1,4 +1,3 @@
-#define __CUDACC__
 #include "test_util.h"
 
 __global__ void cu_max(int a, int b, int* out);

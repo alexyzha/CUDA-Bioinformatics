@@ -124,7 +124,11 @@ __device__ bool __cu_uf_con(cu_union_find* UF, int x, int y);
  *****************************************************/
 #ifndef C_KMER_HASH_TABLE
 #define C_KMER_HASH_TABLE
+/**
+ *  @brief Kmer hashtable defaults and assoc offsets.
+ */
 #define EMPTY -1
+#define EMPTY_OFFSET 1
 
 /**
  *  Hash table key-value pair for kmer counting/indexing.

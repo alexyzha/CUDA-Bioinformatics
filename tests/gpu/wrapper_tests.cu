@@ -71,7 +71,7 @@ void CU_WRAPPER_TESTS(std::vector<TEST_RESULT*>& RESULTS) {
         for(int i = 0; i < 10; ++i) {
             std::string qual = "";
             std::string seq = "";
-            char min = 255;
+            unsigned char min = 0;
             for(int i = 0; i < 100; ++i) {
                 char q = (rand() % 42) + 33;
                 min = (min < q ? min : q);

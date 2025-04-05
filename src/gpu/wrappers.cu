@@ -234,7 +234,7 @@ std::unordered_map<uint64_t, std::unordered_set<int>> cu_index_kmers(const std::
         }
 
         // Insert up until MAP_MAX_INDICES matching indices
-        for(int j = 1; j <= (h_map[i].value[0] - EMPTY); ++j) {
+        for(int j = 1; j <= (h_map[i].value[0] + EMPTY_OFFSET); ++j) {
             ret[h_map[i].key].insert(h_map[i].value[j]);
         }
     }
@@ -367,7 +367,7 @@ std::vector<std::unordered_set<int>*> cu_cluster_by_kmer(const std::vector<fq_re
         if(!ret[root]) {
             ret[root] = new std::unordered_set<int>();
         }
-        for(int j = 1; j <= (h_ret_map[i].value[0] - EMPTY); ++j) {
+        for(int j = 1; j <= (h_ret_map[i].value[0] + EMPTY_OFFSET); ++j) {
             ret[root]->insert(h_ret_map[i].value[j]);
         }
     }

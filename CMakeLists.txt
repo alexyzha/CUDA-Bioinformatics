@@ -52,3 +52,8 @@ set(ALL_SOURCES
 )
 
 add_executable(all_gpu_tests ${ALL_SOURCES})
+
+target_compile_options(all_gpu_tests PRIVATE
+    $<$<COMPILE_LANGUAGE:CUDA>:-diag-suppress=815>
+    $<$<COMPILE_LANGUAGE:CUDA>:-diag-suppress=780>
+)

@@ -1,4 +1,3 @@
-#define __CUDACC__
 #include "test_util.h"
 #include "global_wrappers.cuh"
 
