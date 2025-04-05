@@ -4,7 +4,7 @@ void CU_UTIL_TESTS(std::vector<TEST_RESULT*>& RESULTS) {
     srand(0x56709AAE);
 
     // Simple __max test
-    RESULTS.push_back(TEST("CU_UTIL", "MAX_A<B", [](){
+    RESULTS.push_back(TEST("CU_UTIL", "MAX_A_LESS_THAN_B", [](){
         // Device vars
         int* d_ret;
         CUDA_CHECK(cudaMalloc(&d_ret, sizeof(int)));
@@ -23,7 +23,7 @@ void CU_UTIL_TESTS(std::vector<TEST_RESULT*>& RESULTS) {
     }));
 
     // Simple __max test
-    RESULTS.push_back(TEST("CU_UTIL", "MAX_A>B", [](){
+    RESULTS.push_back(TEST("CU_UTIL", "MAX_A_GREATER_THAN_B", [](){
         // Device vars
         int* d_ret;
         CUDA_CHECK(cudaMalloc(&d_ret, sizeof(int)));
