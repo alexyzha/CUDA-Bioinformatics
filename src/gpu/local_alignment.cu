@@ -3,16 +3,16 @@
 __global__ void cu_local_alignment(char* ALL_SEQ, char* CIGAR_BUF, int* CACHE, uint32_t* OFFSETS, size_t LEN, int* RET) {
     // OOB check for block/thread
     int SEQ_NUM = blockIdx.x * blockDim.x + threadIdx.x;
-    if(SEQ_NUM >= LEN || !SEQ_NUM) {
+    if(SEQ_NUM >= LEN) {
         return;
     }
 
     // Extract ref and read offsets for convenience
     size_t REF_BEGIN = 0;
     size_t REF_SIZE = OFFSETS[0] + 1;
-    size_t READ_BEGIN = OFFSETS[SEQ_NUM - 1] + 1;
-    size_t READ_SIZE = OFFSETS[SEQ_NUM] + 1 - READ_BEGIN;
-    size_t CIGAR_BEGIN = SEQ_NUM * MAX_CIGAR_LEN;
+    size_t READ_BEGIN = OFFSETS[SEQ_NUM] + 1;
+    size_t READ_SIZE = OFFSETS[SEQ_NUM + 1] + 1 - READ_BEGIN;
+    size_t CIGAR_BEGIN = SEQ_NUM * (MAX_CIGAR_LEN + 1);
 
     // Find preallocated space from CACHE
     int* cache = &CACHE[(MAX_REF_LEN + 1) * (MAX_READ_LEN + 1) * SEQ_NUM];
@@ -70,6 +70,7 @@ __global__ void cu_local_alignment(char* ALL_SEQ, char* CIGAR_BUF, int* CACHE, u
             cur = 'I';
             --j;
         } else {
+            printf("TRACEBACK ERR\n");
             break;
         }
 
@@ -77,7 +78,7 @@ __global__ void cu_local_alignment(char* ALL_SEQ, char* CIGAR_BUF, int* CACHE, u
         if(cur == prev) {
             ++count;
         } else {
-            if(count) {
+            if(count && prev) {
                 cigar_iter += __reverse_to_cigar(
                     cigar + cigar_iter, 
                     count,
@@ -88,7 +89,7 @@ __global__ void cu_local_alignment(char* ALL_SEQ, char* CIGAR_BUF, int* CACHE, u
             prev = cur;
         }
     }
-
+    
     // Check for leftovers
     if(count) {
         cigar_iter += __reverse_to_cigar(
@@ -116,13 +117,15 @@ __global__ void cu_local_alignment(char* ALL_SEQ, char* CIGAR_BUF, int* CACHE, u
 __global__ void cu_fq_local_alignment(char* REF, cu_fq_read* READS, char* CIGAR_BUF, int* CACHE, uint32_t* OFFSETS, size_t LEN, size_t REF_SIZE, int* RET) {
     // OOB check for block/thread
     int SEQ_NUM = blockIdx.x * blockDim.x + threadIdx.x;
-    if(SEQ_NUM >= LEN || !SEQ_NUM) {
+    if(SEQ_NUM >= LEN) {
         return;
     }
 
     // Extract ref and read offsets for convenience
-    size_t READ_SIZE = READS[SEQ_NUM].size;
-    size_t CIGAR_BEGIN = SEQ_NUM * MAX_CIGAR_LEN;
+    size_t REF_BEGIN = 0;
+    size_t READ_BEGIN = OFFSETS[SEQ_NUM] + 1;
+    size_t READ_SIZE = OFFSETS[SEQ_NUM + 1] + 1 - READ_BEGIN;
+    size_t CIGAR_BEGIN = SEQ_NUM * (MAX_CIGAR_LEN + 1);
 
     // Find preallocated space from CACHE
     int* cache = &CACHE[(MAX_REF_LEN + 1) * (MAX_READ_LEN + 1) * SEQ_NUM];
@@ -135,7 +138,7 @@ __global__ void cu_fq_local_alignment(char* REF, cu_fq_read* READS, char* CIGAR_
         for(int j = 1; j <= READ_SIZE; ++j) {
             int dgnl = (
                 DP(i - 1, j - 1)
-                + (REF[i - 1] == READS[SEQ_NUM].seq[j - 1] 
+                + (REF[REF_BEGIN + i - 1] == READS[SEQ_NUM].seq[READ_BEGIN + j - 1] 
                     ? ALIGN_MATCH 
                     : ALIGN_MISMATCH)
             );
@@ -162,7 +165,7 @@ __global__ void cu_fq_local_alignment(char* REF, cu_fq_read* READS, char* CIGAR_
     while(i > 0 && j > 0 && DP(i, j) > 0) {
         int score = DP(i, j);
         int match = (
-            REF[i - 1] == READS[SEQ_NUM].seq[j - 1] 
+            REF[REF_BEGIN + i - 1] == READS[SEQ_NUM].seq[READ_BEGIN + j - 1]
                 ? ALIGN_MATCH
                 : ALIGN_MISMATCH
         );
@@ -180,6 +183,7 @@ __global__ void cu_fq_local_alignment(char* REF, cu_fq_read* READS, char* CIGAR_
             cur = 'I';
             --j;
         } else {
+            printf("TRACEBACK ERR\n");
             break;
         }
 
@@ -187,9 +191,9 @@ __global__ void cu_fq_local_alignment(char* REF, cu_fq_read* READS, char* CIGAR_
         if(cur == prev) {
             ++count;
         } else {
-            if(count) {
+            if(count && prev) {
                 cigar_iter += __reverse_to_cigar(
-                    cigar + cigar_iter,
+                    cigar + cigar_iter, 
                     count,
                     prev 
                 );
@@ -198,7 +202,7 @@ __global__ void cu_fq_local_alignment(char* REF, cu_fq_read* READS, char* CIGAR_
             prev = cur;
         }
     }
-
+    
     // Check for leftovers
     if(count) {
         cigar_iter += __reverse_to_cigar(

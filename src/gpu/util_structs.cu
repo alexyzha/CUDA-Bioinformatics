@@ -1,5 +1,8 @@
 #include "headers/util_structs.cuh"
 
+/*****************************************************
+ *            UNION FIND STRUCT DEFINITION           *
+ *****************************************************/
 #ifdef C_CU_UF
 
 cu_union_find* cu_uf_construct(int n) {
@@ -119,6 +122,9 @@ __device__ bool __cu_uf_con(cu_union_find* UF, int x, int y) {
 
 #endif
 
+/*****************************************************
+ *         KMER HASHTABLE STRUCT DEFINITION          *
+ *****************************************************/
 #ifdef C_KMER_HASH_TABLE
 
 __device__ uint64_t __kh_hash(uint64_t key) {

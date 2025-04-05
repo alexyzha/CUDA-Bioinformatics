@@ -334,12 +334,12 @@ void CU_WRAPPER_TESTS(std::vector<TEST_RESULT*>& RESULTS) {
             "4M",
             "3M1X1M",
             "3M1D3M",
-            "3M1I4M"
+            "2M1I5M"
         };
         std::vector<std::vector<int>> exp_nums {
             {3, 3, 8},          // {end ref, end read, score}
             {4, 3, 8},
-            {4, 4, 7},
+            {5, 4, 7},
             {6, 5, 10},
             {6, 7, 12}
         };

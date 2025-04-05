@@ -1,6 +1,6 @@
 # CUDA-Bioinformatics
 
-Currently working on: `debugging` `documentation` `final package polishing`
+Currently working on: `documentation` `add gpu test results to pipeline`
 
 To compile and run GPU tests:
 

@@ -50,6 +50,9 @@
 
 #ifndef CU_CALL_CHECK
 #define CU_CALL_CHECK
+/**
+ *  @brief Macro for returning CUDA errors on CUDA fails.
+ */
 #define CUDA_CHECK(call) \
     do { \
         cudaError_t err = call; \
@@ -61,17 +64,30 @@
     } while(0)
 #endif
 
-/*
- *  Device side max convenience function
+/**
+ *  Device function for getting the max of 2 ints.
+ *  @param a `int` number 1
+ *  @param b `int` number 2
+ *  @return `int` max(a, b)
  */
 __device__ int __max(int a, int b);
 
-/*
- *  Converts bases ACGT to 2-bit bitmask
+/**
+ *  Device function for converting bases ACGT to 2-bit bitmask.
+ *  @param base `char` character to encode
+ *  @return `char` 2-bit or 8-bit mask
+ *  @note Non-ACGT chars return `0x80`.
+ *  @note Exact same logic as CPU version.
  */
 __device__ char __base_to_bit(char base);
 
-/*
- *  Case-specific function for adding to the end of a cigar string
+/**
+ *  Device function. Case-specific function for adding to the end of a cigar string.
+ *  @param str `char*` pointer to end of cigar string
+ *  @param count `int` count of current operations
+ *  @param op `char` ID of current operation
+ *  @return `int` number of chars appended
+ *  @note In this implementation of multithreaded local alignment, cigar strings are built in reverse.
+ *  @note This function is specifically written for that case, as cigar strings are reversed before they are returned. 
  */
 __device__ int __reverse_to_cigar(char* str, int count, char op);

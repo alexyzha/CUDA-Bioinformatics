@@ -21,21 +21,16 @@ __device__ char __base_to_bit(char base) {
 }
 
 __device__ int __reverse_to_cigar(char* str, int count, char op) {
-    int i = 1;
-    int temp = count;
-
-    // Special 0 case
-    if(temp == 0) {
-        str[1] = '0';
-        str[2] = op;
-        return 3;
+    if(!count || !op) {
+        return 0;
     }
 
     // Write op then digits in reverse
+    int i = 1;
     str[0] = op;
-    while (temp > 0) {
-        str[i + 1] = '0' + (temp % 10);
-        temp /= 10;
+    while(count) {
+        str[i] = '0' + (count % 10);
+        count /= 10;
         ++i;
     }
     return i;
