@@ -114,7 +114,7 @@ __global__ void cu_local_alignment(char* ALL_SEQ, char* CIGAR_BUF, int* CACHE, u
     RET[RET_BEGIN + 2] = MAX_SCORE;
 }
 
-__global__ void cu_fq_local_alignment(char* REF, cu_fq_read* READS, char* CIGAR_BUF, int* CACHE, uint32_t* OFFSETS, size_t LEN, size_t REF_SIZE, int* RET) {
+__global__ void cu_fq_local_alignment(char* REF, cu_fq_read* READS, char* CIGAR_BUF, int* CACHE, size_t LEN, size_t REF_SIZE, int* RET) {
     // OOB check for block/thread
     int SEQ_NUM = blockIdx.x * blockDim.x + threadIdx.x;
     if(SEQ_NUM >= LEN) {
@@ -123,8 +123,8 @@ __global__ void cu_fq_local_alignment(char* REF, cu_fq_read* READS, char* CIGAR_
 
     // Extract ref and read offsets for convenience
     size_t REF_BEGIN = 0;
-    size_t READ_BEGIN = OFFSETS[SEQ_NUM] + 1;
-    size_t READ_SIZE = OFFSETS[SEQ_NUM + 1] + 1 - READ_BEGIN;
+    size_t READ_BEGIN = 0;
+    size_t READ_SIZE = READS[SEQ_NUM].size;
     size_t CIGAR_BEGIN = SEQ_NUM * (MAX_CIGAR_LEN + 1);
 
     // Find preallocated space from CACHE

@@ -38,7 +38,6 @@ __global__ void cu_fq_local_alignment(
     cu_fq_read* READS,
     char* CIGAR_BUF,
     int* CACHE,
-    uint32_t* OFFSETS,
     size_t LEN,
     size_t REF_SIZE,
     int* RET
