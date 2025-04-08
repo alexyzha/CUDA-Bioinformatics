@@ -20,6 +20,7 @@ cmake ..
 make
 ./[EXEC_NAME]
 ```
+- For compiling with the pure `C++` part of this project, you can also just use a makefile. A template can be found at `./tests/cpu/Makefile`. It compiles all `C++` code with all CPU tests (`GTEST`).
 
 ## Developing Environment
 
