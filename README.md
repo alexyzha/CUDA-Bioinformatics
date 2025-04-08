@@ -10,6 +10,17 @@ I decided to write a bioinformatics toolchain because even though I am a Quantit
 
 The code in this repository is written to parse, format/package, and analyze `.fasta`, `.fastq`, and `.sam` files. The regular `C++` code supports all 3 of these files. However, the `CUDA` code only supports operations on `.fastq` file data. However, all of the `CUDA` code is neatly wrapped in `__host__` code wrappers: you don't actually have to process/format data to use the `CUDA` kernels I wrote.
 
+## Compiling
+- Use CMake to compile any projects.
+- An example template can be found in the root directory (`./CMakeLists.txt`). It compiles all `CUDA` code with all `CUDA` tests.
+- To build, from the root directory:
+```{bash}
+mkdir && cd build
+cmake ..
+make
+./[EXEC_NAME]
+```
+
 ## Developing Environment
 
 - Docker base image: `cuda:12.1.1-devel-ubuntu22.04`. On my Mac, I use `Ubuntu:LATEST` since I don't have an NVIDIA GPU on there.
